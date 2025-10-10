@@ -1,32 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from 'framer-motion';
 import thinkletLogo from "../assets/thinklet.png"
+import { GridBackground } from "../components/gridBackground";
 
-const GridBackground = () => (
-  <div className="absolute inset-0 opacity-50 z-0 overflow-hidden">
-    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path
-            d="M 40 0 L 0 0 0 40 M 0 0 L 40 0 M 0 0 L 0 40"
-            fill="none"
-            stroke="rgba(167, 139, 250, 0.3)"
-            strokeWidth="1"
-          />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid)" />
-    </svg>
-    <div
-      className="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"
-      style={{ zIndex: -1 }}
-    ></div>
-    <div
-      className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"
-      style={{ zIndex: -1, animationDelay: "1s" }}
-    ></div>
-  </div>
-);
 
 // Landing Page
 export const LandingPage = () => {
@@ -60,13 +36,13 @@ export const LandingPage = () => {
             className="flex gap-2 sm:gap-3"
           >
             <button 
-              onClick={() => onNavigate('login')}
+              onClick={() => onNavigate('/login')}
               className="px-4 sm:px-6 py-2 text-purple-600 hover:text-purple-700 font-medium transition-colors"
             >
               Login
             </button>
             <button 
-              onClick={() => onNavigate('register')}
+              onClick={() => onNavigate('/signup')}
               className="px-4 sm:px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
             >
               Sign Up
@@ -84,7 +60,7 @@ export const LandingPage = () => {
             transition={{ duration: 0.6 }}
           >
 
-            <motion.img src={thinkletLogo} className="mb-10">
+            <motion.img src={thinkletLogo} className="mb-10 w-96 ">
             
             </motion.img>
 
@@ -113,7 +89,7 @@ export const LandingPage = () => {
               transition={{ delay: 0.6 }}
             >
               <button 
-                onClick={() => onNavigate('register')}
+                onClick={() => onNavigate('/signup')}
                 className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-base sm:text-lg"
               >
                 Get Started Free

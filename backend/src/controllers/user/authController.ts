@@ -1,32 +1,41 @@
 import { Request, Response } from 'express';
-import { loginUser, signupUser, } from '../../services/user/authService';
+import { loginUser, signupUser,getAccessToken } from '../../services/user/authService';
 import { HttpStatusCode } from '../../utils/enum';
 import { MESSAGES } from '../../utils/messages';
 
-export const signup = async (
-    req: Request,
-    res: Response,
-  ): Promise<void> =>{
-    try {
-      const { firstName,lastName, email, password, confirmPassword, phone, preferences } = req.body;
+export const signup = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { firstName, lastName, email, password, confirmPassword, phone, preferences } = req.body;
 
-      const userDetails = { firstName,lastName, email, password, confirmPassword, phone, preferences };
+    const userDetails = { firstName, lastName, email, password, confirmPassword, phone, preferences };
 
-      console.log("user details is ", userDetails);
+    console.log("user details is ", userDetails);
 
-      const user = await signupUser(userDetails);
+    const response = await signupUser(userDetails);
 
-      console.log("user  is ", user);
+    console.log("user is ", response.user);
+    res.cookie("thinklet_refreshToken", response.refreshToken, {
+        httpOnly: true,
+        sameSite: "none", // allow cross-site
+        secure: true, // only over HTTPS
+        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+      });
 
-      res.status(HttpStatusCode.CREATED).json(user);
-
-    } catch (error) {
-      console.log(error);
-      res
-        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-        .json({ message: MESSAGES.server.serverError });
-    }
+      res.cookie("thinklet_accessToken", response.accessToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+      });
+    res.status(HttpStatusCode.CREATED).json(response.user);
+  } catch (error: any) {
+    console.error("Error in signup:", error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR'
+    });
   }
+};
 
 
 export const login =  async (req: Request, res: Response): Promise<void> =>{
@@ -96,4 +105,48 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
     }
 
     
+  };
+
+
+
+  export const accessToken =  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { refreshToken } = req.cookies;
+
+      if (!refreshToken) {
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ msg: "refresh token not found" });
+        return;
+      }
+
+      const result = await getAccessToken(refreshToken);
+
+      console.log("result from ctrl is ...", result);
+
+      if (!result) {
+        res
+          .status(HttpStatusCode.UNAUTHORIZED)
+          .json({ msg: "Refresh token expired" });
+        return;
+      }
+
+      const { accessToken } = result;
+
+      console.log("result from ctrl is afrt destructr...", accessToken);
+
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+      });
+
+      res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: MESSAGES.server.serverError });
+    }
   }

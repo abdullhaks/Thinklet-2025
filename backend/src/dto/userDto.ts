@@ -4,6 +4,7 @@ export interface userSignupRequestDto {
   phone: string;
   email: string;
   password: string;
+  confirmPassword: string;
   profile?:string;
   preferences: string[]
 };
