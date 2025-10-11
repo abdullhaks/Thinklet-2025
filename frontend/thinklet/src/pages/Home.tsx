@@ -1,118 +1,72 @@
+// src/pages/Home.tsx (assuming pages folder)
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GridBackground } from '../components/gridBackground';
 import { Navbar } from '../components/Navbar';
 import { ArticleCard } from '../components/ArticleCard';
-
-
-
-
+import { type ArticleResponseDTO } from '../interfaces/article';
+import { type IUser } from '../interfaces/user';
 
 export const Home = () => {
-    
-  const [articles, setArticles] = useState([
+  const [articles] = useState<ArticleResponseDTO[]>([
     {
-      id: 1,
-      title: "The Future of Artificial Intelligence in Healthcare",
-      description: "Exploring how AI is revolutionizing medical diagnostics, treatment planning, and patient care. From early disease detection to personalized medicine, AI is transforming the healthcare landscape.",
-      author: { name: "Dr. Sarah Johnson", id: "user123" },
-      category: "Technology",
-      tags: ["AI", "Healthcare", "Innovation"],
-      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80",
-      likes: 245,
-      comments: 32,
-      publishedDate: "2 days ago"
+      _id: '1',
+      title: 'The Future of Artificial Intelligence in Healthcare',
+      description: 'Exploring how AI is revolutionizing medical diagnostics, treatment planning, and patient care.',
+      thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
+      tags: ['AI', 'Healthcare', 'Innovation'],
+      category: { _id: 'cat1', name: 'Technology' },
+      author: { _id: 'user1', firstName: 'Sarah', lastName: 'Johnson' },
+      likesCount: 245,
+      dislikesCount: 10,
+      userInteraction: { liked: false, disliked: false, blocked: false },
+      createdAt: new Date('2024-10-09'),
+      updatedAt: new Date('2024-10-09'),
     },
     {
-      id: 2,
-      title: "10 Essential Tips for Marathon Training",
-      description: "Whether you're a beginner or seasoned runner, these training tips will help you prepare for your next marathon. Learn about proper nutrition, rest days, and building endurance.",
-      author: { name: "Mike Chen", id: "user456" },
-      category: "Sports",
-      tags: ["Running", "Fitness", "Marathon"],
-      image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80",
-      likes: 189,
-      comments: 24,
-      publishedDate: "3 days ago"
+      _id: '2',
+      title: '10 Essential Tips for Marathon Training',
+      description: 'Whether you\'re a beginner or seasoned runner, these training tips will help you prepare.',
+      thumbnail: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80',
+      tags: ['Running', 'Fitness', 'Marathon'],
+      category: { _id: 'cat2', name: 'Sports' },
+      author: { _id: 'user2', firstName: 'Mike', lastName: 'Chen' },
+      likesCount: 189,
+      dislikesCount: 5,
+      userInteraction: { liked: false, disliked: false, blocked: false },
+      createdAt: new Date('2024-10-08'),
+      updatedAt: new Date('2024-10-08'),
     },
-    {
-      id: 3,
-      title: "Understanding Mental Health in the Digital Age",
-      description: "The impact of social media and technology on our mental well-being. Discover strategies for maintaining healthy digital habits and protecting your mental health.",
-      author: { name: "Emma Williams", id: "user789" },
-      category: "Health",
-      tags: ["MentalHealth", "Wellness", "Technology"],
-      image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80",
-      likes: 412,
-      comments: 67,
-      publishedDate: "5 days ago"
-    },
-    {
-      id: 4,
-      title: "Breaking: Global Climate Summit Reaches Historic Agreement",
-      description: "World leaders have announced a groundbreaking climate agreement aimed at reducing carbon emissions by 50% over the next decade. Details of the implementation plan revealed.",
-      author: { name: "James Rodriguez", id: "user321" },
-      category: "News",
-      tags: ["Climate", "Politics", "Environment"],
-      image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&q=80",
-      likes: 567,
-      comments: 89,
-      publishedDate: "1 day ago"
-    },
-    {
-      id: 5,
-      title: "The Rise of Quantum Computing: What You Need to Know",
-      description: "Quantum computers are no longer science fiction. Learn how this revolutionary technology works and how it will impact industries from finance to pharmaceuticals.",
-      author: { name: "Dr. Lisa Park", id: "user654" },
-      category: "Science",
-      tags: ["Quantum", "Computing", "Technology"],
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&q=80",
-      likes: 334,
-      comments: 45,
-      publishedDate: "4 days ago"
-    },
-    {
-      id: 6,
-      title: "Nutrition Myths Debunked: What Science Really Says",
-      description: "Separating fact from fiction in the world of nutrition. We examine common dietary beliefs and what the latest research reveals about healthy eating.",
-      author: { name: "Rachel Green", id: "user987" },
-      category: "Health",
-      tags: ["Nutrition", "Health", "Science"],
-      image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
-      likes: 298,
-      comments: 56,
-      publishedDate: "1 week ago"
-    }
+    // Add more dummy articles as needed
   ]);
 
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    preferences: ["Technology", "Health", "Sports"]
+  const user: IUser = {
+    _id: 'user123',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    preferences: ['Technology', 'Health', 'Sports'],
   };
 
   const handleLoadMore = () => {
     setLoading(true);
-    // Simulate API call
+    // Simulate API, later replace
     setTimeout(() => {
-      // In real app, fetch more articles from API
       setLoading(false);
-      // setHasMore(false); // Set to false when no more articles
+      // setHasMore(false); when no more
     }, 1000);
   };
-
- 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
       <GridBackground />
       
-      <Navbar/>
+      <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 z-20">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -120,7 +74,7 @@ export const Home = () => {
           className="mb-8 sm:mb-12"
         >
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">{user.name.split(' ')[0]}</span>!
+            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">{user.firstName}</span>!
           </h1>
           <p className="text-sm sm:text-base text-gray-600">Discover articles based on your interests</p>
         </motion.div>
@@ -146,14 +100,21 @@ export const Home = () => {
         </motion.div>
 
         {/* Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-          {articles.map((article, index) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
+        {articles.length === 0 ? (
+          <div className="text-center py-20">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles available</h3>
+            <p className="text-gray-600">Check back later or adjust your preferences.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
+            {articles.map((article) => (
+              <ArticleCard key={article._id} article={article} />
+            ))}
+          </div>
+        )}
 
         {/* Load More Button */}
-        {hasMore && (
+        {hasMore && articles.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

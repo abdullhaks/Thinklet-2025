@@ -1,5 +1,6 @@
 import { userInstance } from "../../utils/axiosFactory";
 import { ROUTES } from "../../constants/routes";
+import { article } from "framer-motion/client";
 
 export const signupUser = async (userData: any) => {
   try {
@@ -64,3 +65,35 @@ export const logoutUser = async () => {
     throw error;
   }
 };
+
+export const getArticle = async (articleId:string)=>{
+  try{
+
+    const response =await userInstance.get(`${ROUTES.user.article}/${articleId}`);
+    return response.data ;
+
+  }catch(error:any){
+     console.error("Error in fetching article:", error);
+    throw {
+      message: error.response?.data?.message || "Failed fetch article",
+      code: error.response?.data?.code || "SERVER_ERROR"
+  }
+}
+
+};
+
+
+export const createArticle = async (articleData:FormData)=>{
+
+  console.log("herere.e.e...e.")
+  try{
+    const response = await userInstance.post(ROUTES.user.article,articleData)
+    return response.data;
+  }catch(error:any){
+     console.error("Article posting failed:", error);
+    throw {
+      message: error.response?.data?.message || "Failed to sign up",
+      code: error.response?.data?.code || "SERVER_ERROR"
+    };
+  }
+}

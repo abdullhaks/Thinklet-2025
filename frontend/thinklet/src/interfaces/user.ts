@@ -1,9 +1,9 @@
-export interface userResponseDto {
+export interface IUser {
   _id: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   email: string;
-  phone: string;
-  preferences: string[];
-  profile?:string
+  profile?: string;
+  preferences: string[]; 
 }

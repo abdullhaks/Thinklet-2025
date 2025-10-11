@@ -7,7 +7,8 @@ export const ROUTES = {
     login: "/user/login",
     accessToken: "/user/accessToken",
     logout: "/user/logout",
-    category:"/user/category"
+    category:"/user/category",
+    article:"/user/articleCreate"
     
   },
 
