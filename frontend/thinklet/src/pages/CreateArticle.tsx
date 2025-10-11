@@ -73,6 +73,31 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   const [thumbnailError, setThumbnailError] = useState<string>('');
   const [categories, setCategories] = useState<Category[]>([]);
 
+
+  useEffect(() => {
+  if (editMode && articleId) {
+    const fetchArticle = async () => {
+      try {
+        // const response = await getArticle(articleId); // Implement this API
+        // setFormData({
+        //   title: response.title,
+        //   description: response.description,
+        //   category: response.category._id,
+        //   tags: response.tags || [],
+        //   thumbnail: null,
+        //   author: user._id,
+        // });
+        // if (response.thumbnail) {
+        //   setThumbnailPreview(response.thumbnail);
+        // }
+      } catch (error) {
+        message.error('Failed to load article');
+      }
+    };
+    fetchArticle();
+  }
+}, [editMode, articleId, user._id]);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {

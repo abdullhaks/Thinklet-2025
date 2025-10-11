@@ -1,6 +1,5 @@
 import { userInstance } from "../../utils/axiosFactory";
 import { ROUTES } from "../../constants/routes";
-import { article } from "framer-motion/client";
 
 export const signupUser = async (userData: any) => {
   try {

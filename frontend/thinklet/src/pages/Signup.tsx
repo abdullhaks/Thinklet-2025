@@ -57,7 +57,6 @@ export const Signup = () => {
     
   },[])
 
-  const availablePreferences = ['Sports', 'News', 'Health', 'Technology', 'Business', 'Entertainment', 'Science', 'Politics'];
 
   const validateField = (name: string, value: any) => {
     const newErrors = { ...errors };

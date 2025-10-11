@@ -41,6 +41,8 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
 
   const response = await User.create(userData);
 
+  const {password,...rest} = response;
+
 
     const accessToken = generateAccessToken({
       id: response._id.toString(),
@@ -56,7 +58,7 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
 
   return {
     message: "Signup successful",
-    user: response,
+    user: rest,
     accessToken,
     refreshToken
   };
@@ -107,11 +109,13 @@ export  const loginUser =   async (userData: userLoginRequestDto): Promise<any>=
     }
 
     // const userDTO = await UserMapper.toUserResponseDTO(existingUser);
+  const {password,...rest} = existingUser;
+
 
     console.log("existingUser........", existingUser);
     return {
       message: "Login successful",
-      user: existingUser,
+      user: rest,
       accessToken,
       refreshToken,
     };
