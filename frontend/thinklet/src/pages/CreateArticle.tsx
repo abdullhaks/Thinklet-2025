@@ -173,7 +173,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
         const response = await createArticle(formDataToSend);
         if (response) {
           message.success('Article published successfully!');
-          // navigate('/articles');
+          navigate('/articles');
         }
       }
     } catch (error: any) {

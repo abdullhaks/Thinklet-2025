@@ -87,7 +87,7 @@ export const createArticle = async (articleData:FormData)=>{
 
   console.log("herere.e.e...e.")
   try{
-    const response = await userInstance.post(ROUTES.user.article,articleData)
+    const response = await userInstance.post(ROUTES.user.articleCreate,articleData)
     return response.data;
   }catch(error:any){
      console.error("Article posting failed:", error);
