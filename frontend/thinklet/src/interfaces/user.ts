@@ -6,4 +6,6 @@ export interface IUser {
   email: string;
   profile?: string;
   preferences: string[]; 
-}
+};
+
+

@@ -1,11 +1,11 @@
 import { type Action, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "../slices/userSlice"
 
-import { type userResponseDto } from "../../interfaces/user";
+import { type IUser } from "../../interfaces/user";
 
 
 interface RootState {
-  user: { user: userResponseDto | null };
+  user: { user: IUser | null };
 
 }
 

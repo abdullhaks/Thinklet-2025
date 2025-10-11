@@ -1,7 +1,6 @@
 // src/pages/ArticleList.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { GridBackground } from "../components/gridBackground";
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit, Trash2, Calendar, Heart } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
@@ -27,7 +26,7 @@ export const ArticleList = () => {
     // Add more
   ]); // Dummy, later API. Removed status/views as not in schema
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (/*id: string*/) => {
     if (confirm('Are you sure you want to delete this article?')) {
       // setArticles(articles.filter(a => a._id !== id));
       alert('Article deleted!');
@@ -104,7 +103,7 @@ export const ArticleList = () => {
                     <span>Edit</span>
                   </button>
                   <button
-                    onClick={() => handleDelete(article._id)}
+                    onClick={() => handleDelete(/*article._id*/)}
                     className="flex-1 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center space-x-2 text-sm font-semibold"
                   >
                     <Trash2 className="w-4 h-4" />

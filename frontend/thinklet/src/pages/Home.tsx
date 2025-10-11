@@ -41,7 +41,7 @@ export const Home = () => {
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore ] = useState(true);
 
   const user: IUser = {
     _id: 'user123',

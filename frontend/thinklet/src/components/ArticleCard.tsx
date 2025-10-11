@@ -73,7 +73,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {article.tags.slice(0, 3).map((tag, index) => (
+          {article?.tags?.slice(0, 3).map((tag, index) => (
             <span
               key={index}
               className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full"

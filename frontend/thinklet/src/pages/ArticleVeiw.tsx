@@ -157,7 +157,7 @@ export const ArticleView = () => {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6">
-            {article.tags.map((tag, index) => (
+            {article.tags?.map((tag, index) => (
               <span key={index} className="px-3 py-1 bg-purple-50 text-purple-600 text-sm rounded-full">
                 #{tag}
               </span>
