@@ -1,7 +1,7 @@
 // src/components/ArticleCard.tsx
-import { useState } from "react";
+// import { useState } from "react";
 import { motion } from 'framer-motion';
-import { Heart, Bookmark, Clock, ThumbsDown } from 'lucide-react'; // Added ThumbsDown for dislike
+import {  Clock  } from 'lucide-react'; // Added ThumbsDown for dislike
 import { type ArticleResponseDTO } from '../interfaces/article';
 import { useNavigate } from "react-router-dom";
 
@@ -11,9 +11,9 @@ interface ArticleCardProps {
 
 export const ArticleCard = ({ article }: ArticleCardProps) => {
 
-  const [liked, setLiked] = useState(article.userInteraction.liked);
-  const [disliked, setDisliked] = useState(article.userInteraction.disliked);
-  const [bookmarked, setBookmarked] = useState(false); // Local for now, as no bookmark in schema
+  // const [liked, setLiked] = useState(article.userInteraction.liked);
+  // const [disliked, setDisliked] = useState(article.userInteraction.disliked);
+  // const [bookmarked, setBookmarked] = useState(false); // Local for now, as no bookmark in schema
   const navigate = useNavigate()
   const fullName = `${article.author.firstName} ${article.author.lastName}`;
   const createdDate = new Date(article.createdAt).toLocaleDateString();

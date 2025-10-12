@@ -30,7 +30,7 @@ export const Navbar = () => {
     navigate("/");
   };
 
-  const fullName = `${user.firstName} ${user.lastName}`;
+  const fullName = `${user?.firstName} ${user?.lastName}`;
 
   return (
     <>
@@ -57,6 +57,8 @@ export const Navbar = () => {
             </div>
           </div>
 
+
+          {user?
           <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => navigate('/create')}
@@ -118,7 +120,22 @@ export const Navbar = () => {
                 )}
               </AnimatePresence>
             </div>
-          </div>
+          </div>:
+          
+          <button
+              onClick={() => navigate('/login')}
+              className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md text-xs sm:text-sm font-semibold"
+            >
+              <Plus className="w-4 h-4 sm:hidden" />
+              <span className="hidden sm:inline">login</span>
+          </button>
+          
+          }
+
+          
+
+
+
         </div>
 
 
