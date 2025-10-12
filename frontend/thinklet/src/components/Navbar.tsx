@@ -2,9 +2,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, User, LogOut, Plus, Edit } from 'lucide-react';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { type IUser } from '../interfaces/user'; 
+import { logoutUser as logout } from "../services/apis/userApi";
+import { logoutUser } from "../redux/slices/userSlice";
+import ConfirmModal from "./ConfirmModal";
+
 
 interface RootState {
   user: {
@@ -17,15 +21,19 @@ export const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
-    console.log("Logging out...");
-    alert("Logged out successfully!");
+    dispatch(logoutUser());
+    logout();
+    navigate("/");
   };
 
   const fullName = `${user.firstName} ${user.lastName}`;
 
   return (
+    <>
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-purple-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
@@ -100,7 +108,7 @@ export const Navbar = () => {
                     </button>
                     
                     <button
-                      onClick={() => { setIsDropdownOpen(false); handleLogout(); }}
+                      onClick={() => { setIsDropdownOpen(false); setShowConfirm(true); }}
                       className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center space-x-3 text-red-600 border-t border-gray-100 text-sm"
                     >
                       <LogOut className="w-4 h-4" />
@@ -112,7 +120,25 @@ export const Navbar = () => {
             </div>
           </div>
         </div>
+
+
+
+      
+
+      
       </div>
+    
     </nav>
+
+     {/* Confirm Modal */}
+      {showConfirm && (
+        <ConfirmModal
+          message="Are you sure you want to log out?"
+          onConfirm={handleLogout}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
+      
+    </>
   );
 };

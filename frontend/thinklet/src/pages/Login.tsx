@@ -6,12 +6,13 @@ import { FormInput } from "../components/FormInput";
 import thinkletLogo from "../assets/thinklet.png";
 import { loginUser } from "../services/apis/userApi";
 import { useDispatch } from "react-redux";
-import { logoutUser, loginUser as welcome } from "../redux/slices/userSlice";
+import { loginUser as welcome } from "../redux/slices/userSlice";
 import { message } from "antd";
 
 export const Login = () => {
 const navigate = useNavigate();
 const dispatch = useDispatch();
+const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     emailOrPhone: '',
@@ -65,42 +66,45 @@ const dispatch = useDispatch();
     validateField(name, value);
   };
 
-  const handleSubmit = async() => {
-    const isValid = validateField('emailOrPhone', formData.emailOrPhone) &&
-                    validateField('password', formData.password);
+const handleSubmit = async () => {
+  setIsLoading(true);
+  const isEmailOrPhoneValid = validateField('emailOrPhone', formData.emailOrPhone);
+  const isPasswordValid = validateField('password', formData.password);
+  const isValid = isEmailOrPhoneValid && isPasswordValid;
 
-    if (isValid) {
+  if (!isValid) {
+    message.error('Please fix the form errors');
+    setIsLoading(false);
+    return;
+  }
 
-      try{
-
-        const response = await loginUser(formData);
-      if (response) {
-        dispatch(logoutUser());
-        dispatch(welcome({ user: response.user }));
-        message.success("Signed up successfully");
-        navigate("/user/home");
-      }
-      }catch(error:any){
-        console.error("Signup error:", error);
-              const errorCode = error.code || "SERVER_ERROR";
-              switch (errorCode) {
-                case "USER_EXISTS":
-                  setErrors(prev => ({ ...prev, email: "This email is already registered" }));
-                  break;
-                case "PASSWORD_MISMATCH":
-                  setErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
-                  break;
-                case "MISSING_FIELDS":
-                  message.error("Please provide all required fields");
-                  break;
-                default:
-                  message.error(error.message || "Failed to sign up");
-              }
-      }
-
-    
+  try {
+    const response = await loginUser(formData);
+    dispatch(welcome({ user: response.user }));
+    message.success('Logged in successfully');
+    navigate('/user/home');
+  } catch (error: any) {
+    console.error('Login error:', error);
+    const errorMessage = error.message || 'Failed to log in';
+    if (errorMessage.includes('Invalid credentials')) {
+      setErrors(prev => ({
+        ...prev,
+        emailOrPhone: 'Invalid email/phone or password',
+        password: 'Invalid email/phone or password',
+      }));
+    } else if (errorMessage.includes('Please provide all required fields')) {
+      setErrors(prev => ({
+        ...prev,
+        emailOrPhone: !formData.emailOrPhone ? 'Email or phone is required' : '',
+        password: !formData.password ? 'Password is required' : '',
+      }));
+    } else {
+      message.error(errorMessage);
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 relative flex items-center py-8 sm:py-12">
@@ -164,9 +168,9 @@ const dispatch = useDispatch();
             <button
               onClick={handleSubmit}
               className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={Object.values(errors).some(error => error) || !formData.emailOrPhone || !formData.password}
+              disabled={isLoading || Object.values(errors).some(error => error) || !formData.emailOrPhone || !formData.password}
             >
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
           </div>
 

@@ -38,47 +38,43 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export const login =  async (req: Request, res: Response): Promise<void> =>{
-    try {
-      const {emailOrPhone,password} = req.body;
+export const login = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { emailOrPhone, password } = req.body;
 
-      console.log("loginDTO...........", emailOrPhone,password);
-      const result = await loginUser({emailOrPhone,password})
-
-      console.log("result is ", result);
-
-      if (!result) {
-        res
-          .status(HttpStatusCode.BAD_REQUEST)
-          .json({ msg: "Envalid credentials" });
-        return;
-      }
-
-   
-      res.cookie("thinklet_refreshToken", result.refreshToken, {
-        httpOnly: true,
-        sameSite: "none", // allow cross-site
-        secure: true, // only over HTTPS
-        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+    if (!emailOrPhone || !password) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({
+        message: 'Please provide all required fields',
+        code: 'MISSING_FIELDS',
       });
-
-      res.cookie("thinklet_accessToken", result.accessToken, {
-        httpOnly: true,
-        sameSite: "none",
-        secure: true,
-        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
-      });
-
-      res
-        .status(HttpStatusCode.OK)
-        .json({ message: result.message, user: result.user });
-    } catch (error) {
-      console.log(error);
-      res
-        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-        .json({ message: MESSAGES.server.serverError });
+      return;
     }
+
+    const result = await loginUser({ emailOrPhone, password });
+
+    res.cookie('thinklet_refreshToken', result.refreshToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: parseInt(process.env.MAX_AGE || '604800000'),
+    });
+
+    res.cookie('thinklet_accessToken', result.accessToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: parseInt(process.env.MAX_AGE || '604800000'),
+    });
+
+    res.status(HttpStatusCode.OK).json({ message: result.message, user: result.user });
+  } catch (error: any) {
+    console.error('Error in login:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
   }
+};
 
 
 export const logout =   async (req: Request, res: Response): Promise<void> =>{

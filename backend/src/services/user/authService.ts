@@ -66,60 +66,60 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
 
 
 
-export  const loginUser =   async (userData: userLoginRequestDto): Promise<any>=> {
-    console.log("user data from service....", userData);
+export const loginUser = async (userData: userLoginRequestDto): Promise<any> => {
+  console.log('user data from service....', userData);
 
-    if (!userData.emailOrPhone || !userData.password) {
-      throw new Error("Please provide all required fields");
-    }
-
-    let existingUser = await User.findOne({email:userData.emailOrPhone});
-    console.log("Existing user: ", existingUser);
-
-    if (!existingUser) {
-     existingUser = await User.findOne({phone:userData.emailOrPhone});
-
-     if (!existingUser) {
-      console.log("Invalid credentials");
-
-      throw new Error("Invalid credentials");
-    }
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      userData.password,
-      existingUser.password
-    );
-    if (!isPasswordValid) {
-      throw new Error("Invalid credentials");
-    }
-
-
-    const accessToken = generateAccessToken({
-      id: existingUser._id.toString(),
-      role: "user",
-    });
-    const refreshToken = generateRefreshToken({
-      id: existingUser._id.toString(),
-      role: "user",
-    });
-
-    if (existingUser.profile) {
-      existingUser.profile = await getSignedImageURL(existingUser.profile);
-    }
-
-    // const userDTO = await UserMapper.toUserResponseDTO(existingUser);
-  const {password,...rest} = existingUser;
-
-
-    console.log("existingUser........", existingUser);
-    return {
-      message: "Login successful",
-      user: rest,
-      accessToken,
-      refreshToken,
+  if (!userData.emailOrPhone || !userData.password) {
+    throw {
+      status: HttpStatusCode.BAD_REQUEST,
+      message: 'Please provide all required fields',
+      code: 'MISSING_FIELDS',
     };
+  }
+
+  let existingUser = await User.findOne({ email: userData.emailOrPhone });
+  if (!existingUser) {
+    existingUser = await User.findOne({ phone: userData.emailOrPhone });
+    if (!existingUser) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS',
+      };
+    }
+  }
+
+  const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
+  if (!isPasswordValid) {
+    throw {
+      status: HttpStatusCode.BAD_REQUEST,
+      message: 'Invalid credentials',
+      code: 'INVALID_CREDENTIALS',
+    };
+  }
+
+  const accessToken = generateAccessToken({
+    id: existingUser._id.toString(),
+    role: 'user',
+  });
+  const refreshToken = generateRefreshToken({
+    id: existingUser._id.toString(),
+    role: 'user',
+  });
+
+  if (existingUser.profile) {
+    existingUser.profile = await getSignedImageURL(existingUser.profile);
+  }
+
+  const { password, ...rest } = existingUser.toJSON();
+
+  return {
+    message: 'Login successful',
+    user: rest,
+    accessToken,
+    refreshToken,
   };
+};
 
 
   export const getAccessToken = async (refreshToken: string): Promise<any> => {
