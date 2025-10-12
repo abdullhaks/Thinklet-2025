@@ -1,44 +1,108 @@
 // src/pages/ArticleView.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Bookmark, Clock, Share2, MoreVertical, ArrowLeft, ThumbsDown } from 'lucide-react'; // Added ThumbsDown
+import { Heart, Bookmark, Clock, Share2, MoreVertical, ArrowLeft, ThumbsDown } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getArticle } from '../services/apis/userApi'; 
 import { message } from 'antd';
+import { debounce } from 'lodash';
+import { getArticle, likeArticle, dislikeArticle } from '../services/apis/userApi';
 import { type ArticleResponseDTO } from '../interfaces/article';
 import { Navbar } from '../components/Navbar';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../redux/store/store';
-
 
 export const ArticleView = () => {
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const { articleId } = useParams<{ articleId: string }>();
   const [article, setArticle] = useState<ArticleResponseDTO | null>(null);
+  const { articleId } = useParams<{ articleId: string }>();
   const navigate = useNavigate();
-  const user = useSelector((state:RootState)=>state.user.user);
+  const user = useSelector((state: RootState) => state.user.user);
 
   useEffect(() => {
-    // Dummy data for now, replace with API
+    const fetchArticle = async () => {
+      if (!articleId) {
+        message.error('Article ID is missing');
+        return;
+      }
 
-    let fetchArticle = async ()=>{
-      let response = await getArticle(articleId||"",user?._id || "");
-      if(response){
-        console.log('article from frontend.is...',response);
-
+      try {
+        const response = await getArticle(articleId, user?._id);
+        console.log('Article from frontend:', response);
         setArticle(response.article);
         setLiked(response.article.userInteraction.liked);
         setDisliked(response.article.userInteraction.disliked);
+      } catch (error: any) {
+        message.error(error.message || 'Failed to fetch article');
       }
-    
-    }
-    
+    };
 
-    fetchArticle()
-  }, [articleId]);
+    fetchArticle();
+  }, [articleId, user?._id]);
+
+  // Debounced like handler
+  const handleLike = useCallback(
+    debounce(async () => {
+      if (!user?._id) {
+        message.error('Please log in to like this article');
+        return;
+      }
+      if (!articleId) return;
+
+      try {
+        const response = await likeArticle(articleId, user._id);
+        setLiked(response.liked);
+        setDisliked(false); // Ensure mutually exclusive
+        setArticle((prev) =>
+          prev
+            ? {
+                ...prev,
+                likesCount: response.likesCount,
+                dislikesCount: response.dislikesCount,
+                userInteraction: { ...prev.userInteraction, liked: response.liked, disliked: false },
+              }
+            : prev
+        );
+        message.success(response.liked ? 'Article liked!' : 'Like removed');
+      } catch (error: any) {
+        message.error(error.message || 'Failed to like article');
+      }
+    }, 500),
+    [articleId, user?._id]
+  );
+
+  // Debounced dislike handler
+  const handleDislike = useCallback(
+    debounce(async () => {
+      if (!user?._id) {
+        message.error('Please log in to dislike this article');
+        return;
+      }
+      if (!articleId) return;
+
+      try {
+        const response = await dislikeArticle(articleId, user._id);
+        setDisliked(response.disliked);
+        setLiked(false); // Ensure mutually exclusive
+        setArticle((prev) =>
+          prev
+            ? {
+                ...prev,
+                likesCount: response.likesCount,
+                dislikesCount: response.dislikesCount,
+                userInteraction: { ...prev.userInteraction, liked: false, disliked: response.disliked },
+              }
+            : prev
+        );
+        message.success(response.disliked ? 'Article disliked!' : 'Dislike removed');
+      } catch (error: any) {
+        message.error(error.message || 'Failed to dislike article');
+      }
+    }, 500),
+    [articleId, user?._id]
+  );
 
   const handleBlock = () => {
     if (confirm('Are you sure you want to block this author?')) {
@@ -68,8 +132,6 @@ export const ArticleView = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100">
-   
-      
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 z-20">
         <motion.div
@@ -82,7 +144,6 @@ export const ArticleView = () => {
             <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleShare}
@@ -90,7 +151,6 @@ export const ArticleView = () => {
               >
                 <Share2 className="w-5 h-5" />
               </button>
-              
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
@@ -98,7 +158,6 @@ export const ArticleView = () => {
                 >
                   <MoreVertical className="w-5 h-5 text-gray-600" />
                 </button>
-                
                 {showMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
                     <button
@@ -168,23 +227,26 @@ export const ArticleView = () => {
           <div className="flex items-center justify-between py-6 border-t border-b border-gray-200">
             <div className="flex items-center space-x-6">
               <button
-                onClick={() => setLiked(!liked)}
-                className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+                onClick={handleLike}
+                disabled={!user?._id}
+                className={`flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors ${
+                  !user?._id ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <Heart className={`w-6 h-6 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} />
                 <span className="font-medium">{article.likesCount}</span>
               </button>
-              
               <button
-                onClick={() => setDisliked(!disliked)}
-                className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors"
+                onClick={handleDislike}
+                disabled={!user?._id}
+                className={`flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors ${
+                  !user?._id ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <ThumbsDown className={`w-6 h-6 ${disliked ? 'fill-red-600 text-red-600' : ''}`} />
                 <span className="font-medium">{article.dislikesCount}</span>
               </button>
-              {/* Removed comments */}
             </div>
-
             <button
               onClick={() => setBookmarked(!bookmarked)}
               className="p-2 hover:bg-purple-50 rounded-lg transition-colors"

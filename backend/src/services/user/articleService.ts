@@ -250,7 +250,7 @@ export const getArticleService = async (articleId: string, userId?: string): Pro
     const articleResponse = await getArticleResponse(articleId, userId);
 
     console.log('Article fetched in service:', articleResponse);
-    
+
     return articleResponse;
   } catch (error: any) {
     console.error('Error in getArticleService:', error);
@@ -258,6 +258,140 @@ export const getArticleService = async (articleId: string, userId?: string): Pro
       status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
       message: error.message || 'Failed to fetch article',
       code: error.code || 'FETCH_ARTICLE_ERROR',
+    };
+  }
+};
+
+export const likeArticleService = async (
+  articleId: string,
+  userId: string
+): Promise<{ liked: boolean; likesCount: number; dislikesCount: number }> => {
+  try {
+    // Validate inputs
+    if (!articleId || !userId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID and user ID are required',
+        code: 'MISSING_FIELDS',
+      };
+    }
+
+    // Check if article exists
+    const article = await Article.findById(articleId);
+    if (!article) {
+      throw {
+        status: HttpStatusCode.NOT_FOUND,
+        message: 'Article not found',
+        code: 'ARTICLE_NOT_FOUND',
+      };
+    }
+
+    // Find or create interaction
+    let interaction = await Interaction.findOne({ user: userId, article: articleId });
+
+    if (interaction) {
+      // Toggle like: if already liked, remove like; if disliked, remove dislike and add like
+      if (interaction.like) {
+        interaction.like = false;
+      } else {
+        interaction.like = true;
+        interaction.dislike = false; // Ensure mutual exclusivity
+      }
+      await interaction.save();
+    } else {
+      // Create new interaction with like
+      interaction = await Interaction.create({
+        user: userId,
+        article: articleId,
+        like: true,
+        dislike: false,
+      });
+    }
+
+    // Calculate updated counts
+    const [likesCount, dislikesCount] = await Promise.all([
+      Interaction.countDocuments({ article: articleId, like: true }),
+      Interaction.countDocuments({ article: articleId, dislike: true }),
+    ]);
+
+    return {
+      liked: interaction.like,
+      likesCount,
+      dislikesCount,
+    };
+  } catch (error: any) {
+    console.error('Error in likeArticleService:', error);
+    throw {
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to like article',
+      code: error.code || 'LIKE_ARTICLE_ERROR',
+    };
+  }
+};
+
+export const dislikeArticleService = async (
+  articleId: string,
+  userId: string
+): Promise<{ disliked: boolean; likesCount: number; dislikesCount: number }> => {
+  try {
+    // Validate inputs
+    if (!articleId || !userId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID and user ID are required',
+        code: 'MISSING_FIELDS',
+      };
+    }
+
+    // Check if article exists
+    const article = await Article.findById(articleId);
+    if (!article) {
+      throw {
+        status: HttpStatusCode.NOT_FOUND,
+        message: 'Article not found',
+        code: 'ARTICLE_NOT_FOUND',
+      };
+    }
+
+    // Find or create interaction
+    let interaction = await Interaction.findOne({ user: userId, article: articleId });
+
+    if (interaction) {
+      // Toggle dislike: if already disliked, remove dislike; if liked, remove like and add dislike
+      if (interaction.dislike) {
+        interaction.dislike = false;
+      } else {
+        interaction.dislike = true;
+        interaction.like = false; // Ensure mutual exclusivity
+      }
+      await interaction.save();
+    } else {
+      // Create new interaction with dislike
+      interaction = await Interaction.create({
+        user: userId,
+        article: articleId,
+        like: false,
+        dislike: true,
+      });
+    }
+
+    // Calculate updated counts
+    const [likesCount, dislikesCount] = await Promise.all([
+      Interaction.countDocuments({ article: articleId, like: true }),
+      Interaction.countDocuments({ article: articleId, dislike: true }),
+    ]);
+
+    return {
+      disliked: interaction.dislike,
+      likesCount,
+      dislikesCount,
+    };
+  } catch (error: any) {
+    console.error('Error in dislikeArticleService:', error);
+    throw {
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to dislike article',
+      code: error.code || 'DISLIKE_ARTICLE_ERROR',
     };
   }
 };

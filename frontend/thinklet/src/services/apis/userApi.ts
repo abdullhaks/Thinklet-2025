@@ -131,3 +131,31 @@ export const getPreferenceArticles = async (
     };
   }
 };
+
+export const likeArticle = async (articleId: string, userId: string) => {
+  try {
+    console.log('In likeArticle API with:', { articleId, userId });
+    const response = await userInstance.post(ROUTES.user.likeArticle, { articleId, userId });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in liking article:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to like article',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+};
+
+export const dislikeArticle = async (articleId: string, userId: string) => {
+  try {
+    console.log('In dislikeArticle API with:', { articleId, userId });
+    const response = await userInstance.post(ROUTES.user.dislikeArticle, { articleId, userId });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in disliking article:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to dislike article',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+};

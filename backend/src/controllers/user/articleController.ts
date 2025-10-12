@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { HttpStatusCode } from '../../utils/enum';
 import { MESSAGES } from '../../utils/messages';
-import { articleCreate, getArticleService, getPreferenceArticlesService } from '../../services/user/articleService';
+import { articleCreate, dislikeArticleService, getArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
 import { IPreference } from '../../dto/userDto';
 
 
@@ -140,3 +140,60 @@ export const getArticleController = async (req: Request, res: Response): Promise
   }
 };
 
+export const likeArticleController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleId, userId } = req.body;
+
+    if (!articleId || !userId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID and user ID are required',
+        code: 'MISSING_FIELDS',
+      };
+    }
+
+    const response = await likeArticleService(articleId, userId);
+
+    res.status(HttpStatusCode.OK).json({
+      message: MESSAGES.user.likeSuccess,
+      liked: response.liked,
+      likesCount: response.likesCount,
+      dislikesCount: response.dislikesCount,
+    });
+  } catch (error: any) {
+    console.error('Error in likeArticleController:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
+  }
+};
+
+export const dislikeArticleController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleId, userId } = req.body;
+
+    if (!articleId || !userId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID and user ID are required',
+        code: 'MISSING_FIELDS',
+      };
+    }
+
+    const response = await dislikeArticleService(articleId, userId);
+
+    res.status(HttpStatusCode.OK).json({
+      message: MESSAGES.user.dislikeSuccess,
+      disliked: response.disliked,
+      likesCount: response.likesCount,
+      dislikesCount: response.dislikesCount,
+    });
+  } catch (error: any) {
+    console.error('Error in dislikeArticleController:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
+  }
+};
