@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Bookmark, Clock, Share2, MoreVertical, ArrowLeft, ThumbsDown } from 'lucide-react'; // Added ThumbsDown
 import { useNavigate, useParams } from 'react-router-dom';
-// import { getArticle } from '../services/apis/userApi'; 
+import { getArticle } from '../services/apis/userApi'; 
 import { message } from 'antd';
 import { type ArticleResponseDTO } from '../interfaces/article';
 import { Navbar } from '../components/Navbar';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../redux/store/store';
 
 
 export const ArticleView = () => {
@@ -17,27 +19,25 @@ export const ArticleView = () => {
   const { articleId } = useParams<{ articleId: string }>();
   const [article, setArticle] = useState<ArticleResponseDTO | null>(null);
   const navigate = useNavigate();
+  const user = useSelector((state:RootState)=>state.user.user);
 
   useEffect(() => {
     // Dummy data for now, replace with API
-    const dummyArticle: ArticleResponseDTO = {
-      _id: articleId || '1',
-      title: 'The Future of Artificial Intelligence in Healthcare',
-      description: 'Exploring how AI is revolutionizing medical diagnostics, treatment planning, and patient care. From early disease detection to personalized medicine, AI is transforming the healthcare landscape.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-      thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
-      tags: ['AI', 'Healthcare', 'Innovation'],
-      category: { _id: 'cat1', name: 'Technology' },
-      author: { _id: 'user1', firstName: 'Sarah', lastName: 'Johnson' },
-      likesCount: 245,
-      dislikesCount: 10,
-      userInteraction: { liked: false, disliked: false, blocked: false },
-      createdAt: new Date('2024-10-09'),
-      updatedAt: new Date('2024-10-09'),
-    };
-    setArticle(dummyArticle);
-    setLiked(dummyArticle.userInteraction.liked);
-    setDisliked(dummyArticle.userInteraction.disliked);
-    // Later: fetchArticle();
+
+    let fetchArticle = async ()=>{
+      let response = await getArticle(articleId||"",user?._id || "");
+      if(response){
+        console.log('article from frontend.is...',response);
+
+        setArticle(response.article);
+        setLiked(response.article.userInteraction.liked);
+        setDisliked(response.article.userInteraction.disliked);
+      }
+    
+    }
+    
+
+    fetchArticle()
   }, [articleId]);
 
   const handleBlock = () => {
@@ -64,7 +64,7 @@ export const ArticleView = () => {
   }
 
   const fullName = `${article.author.firstName} ${article.author.lastName}`;
-  const createdDate = article.createdAt.toLocaleDateString();
+  const createdDate = new Date(article.createdAt).toLocaleDateString();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100">

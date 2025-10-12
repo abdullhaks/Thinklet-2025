@@ -1,18 +1,18 @@
+// src/services/user/articleService.ts
 import Article from '../../models/article';
 import Interaction from '../../models/interaction';
 import Category from '../../models/category';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt';
-import { getSignedImageURL, uploadFileToS3 } from '../../helpers/uploadS3';
+import { uploadFileToS3 } from '../../helpers/uploadS3';
 import { HttpStatusCode } from '../../utils/enum';
 import { ArticleResponseDTO, IArticleData } from '../../dto/articleDto';
 import { IPreference } from '../../dto/userDto';
 
-
 interface IThumbnail {
-    buffer: Buffer;
-    originalname: string;
-    mimetype: string;
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
 }
+
 
 interface aggregationResult   {
 
@@ -38,118 +38,170 @@ interface aggregationResult   {
 }
 
 
+export const getArticleResponse = async (articleId: string, userId?: string): Promise<ArticleResponseDTO> => {
+  try {
+    // Validate articleId
+    if (!articleId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID is required',
+        code: 'MISSING_ARTICLE_ID',
+      };
+    }
 
-export const getArticleResponse = async (articleId: string, userId: string) => {
-  // Step 1: Fetch article with populated references
-  const article = await Article.findById(articleId)
-    .populate('author', 'firstName lastName profile _id')
-    .populate('category', 'name _id')
-    .lean();
+    // Fetch article with populated references
+    const article = await Article.findById(articleId)
+      .populate('author', 'firstName lastName profile _id')
+      .populate('category', 'name _id')
+      .lean();
 
-  if (!article) throw new Error('Article not found');
+    if (!article) {
+      throw {
+        status: HttpStatusCode.NOT_FOUND,
+        message: 'Article not found',
+        code: 'ARTICLE_NOT_FOUND',
+      };
+    }
+
   const typedArticle: aggregationResult = JSON.parse( JSON.stringify(article) ); 
 
-  // Step 2: Aggregate likes/dislikes count
-  const [likesCount, dislikesCount] = await Promise.all([
-    Interaction.countDocuments({ article: articleId, like: true }),
-    Interaction.countDocuments({ article: articleId, dislike: true }),
-  ]);
+    // Aggregate likes/dislikes count
+    const [likesCount, dislikesCount] = await Promise.all([
+      Interaction.countDocuments({ article: articleId, like: true }),
+      Interaction.countDocuments({ article: articleId, dislike: true }),
+    ]);
 
-  // Step 3: Get user’s own interaction
-  const userInteraction = await Interaction.findOne({
-    article: articleId,
-    user: userId,
-  }).lean();
+    // Get user’s interaction if userId is provided
+    let userInteraction = {
+      liked: false,
+      disliked: false,
+      blocked: false,
+    };
 
-  const response: ArticleResponseDTO = {
-    _id: typedArticle._id.toString(),
-    title: typedArticle.title,
-    description: typedArticle.description,
-    thumbnail: typedArticle.thumbnail,
-    tags: typedArticle.tags || [],
-    category: {
-      _id: typedArticle.category._id.toString(),
-      name: typedArticle.category.name,
-    },
-    author: {
-      _id: typedArticle.author._id.toString(),
-      firstName: typedArticle.author.firstName,
-      lastName: typedArticle.author.lastName,
-      profile: typedArticle.author.profile,
-    },
-    likesCount,
-    dislikesCount,
-    userInteraction: {
-      liked: userInteraction?.like || false,
-      disliked: userInteraction?.dislike || false,
-      blocked: userInteraction?.block || false,
-    },
-    createdAt: typedArticle.createdAt,
-    updatedAt: typedArticle.updatedAt,
-  };
+    if (userId) {
+      const interaction = await Interaction.findOne({
+        article: articleId,
+        user: userId,
+      }).lean();
+
+      if (interaction) {
+        userInteraction = {
+          liked: interaction.like || false,
+          disliked: interaction.dislike || false,
+          blocked: interaction.block || false,
+        };
+      }
+    }
+
+    // Construct response
+    const response: ArticleResponseDTO = {
+      _id: typedArticle._id.toString(),
+      title: typedArticle.title,
+      description: typedArticle.description,
+      thumbnail: typedArticle.thumbnail || null,
+      tags: typedArticle.tags || [],
+      category: {
+        _id: typedArticle.category._id.toString(),
+        name: typedArticle.category.name,
+      },
+      author: {
+        _id: typedArticle.author._id.toString(),
+        firstName: typedArticle.author.firstName,
+        lastName: typedArticle.author.lastName,
+        profile: typedArticle.author.profile || undefined,
+      },
+      likesCount,
+      dislikesCount,
+      userInteraction,
+      createdAt: typedArticle.createdAt,
+      updatedAt: typedArticle.updatedAt,
+    };
 
 
-  return response;
-};
-
-
-
-
-export const articleCreate = async (articleData:Partial<IArticleData>,thumbnail:IThumbnail|undefined): Promise<any> => {
-  console.log("user data from service....", articleData);
-
-  if (!articleData.title || !articleData.description || !articleData.category || !articleData.author ) {
+    console.log("Article Response:", response);
+    
+    return response;
+  } catch (error: any) {
     throw {
-      status: HttpStatusCode.BAD_REQUEST,
-      message: "Please provide all required fields",
-      code: "MISSING_FIELDS"
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to fetch article',
+      code: error.code || 'FETCH_ARTICLE_ERROR',
     };
   }
-
-  const categoryExists = await Category.findById(articleData.category);
-if (!categoryExists) {
-  throw {
-    status: HttpStatusCode.BAD_REQUEST,
-    message: "Invalid category",
-    code: "INVALID_CATEGORY"
-  };
-}
-
-  let thumUrl = 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/thinklet_thumbnails/download+(3).jfif'
-
-
-  if (thumbnail) {
-    let urls = await uploadFileToS3(
-      thumbnail.buffer,
-      thumbnail.originalname,
-      "thinklet_thumbnails",
-      thumbnail.mimetype
-    );
-if (urls) {
-  thumUrl = urls.fileUrl;
-}
-let newArticle = {
-    title: articleData.title,
-    description: articleData.description,
-    thumbnail: thumUrl,
-    tags: articleData.tags,
-    category: articleData.category,
-    author: articleData.author
 };
 
+export const articleCreate = async (
+  articleData: Partial<IArticleData>,
+  thumbnail?: IThumbnail
+): Promise<{ message: string; article: ArticleResponseDTO }> => {
+  try {
+    // Validate required fields
+    if (!articleData.title || !articleData.description || !articleData.category || !articleData.author) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Please provide all required fields (title, description, category, author)',
+        code: 'MISSING_FIELDS',
+      };
+    }
 
-    let response =  await Article.create(newArticle);
+    // Validate category
+    const categoryExists = await Category.findById(articleData.category);
+    if (!categoryExists) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Invalid category',
+        code: 'INVALID_CATEGORY',
+      };
+    }
 
-    console.log("article created..",response);
+    // Handle thumbnail upload
+    let thumbnailUrl: string | undefined;
+    if (thumbnail) {
+      const uploadResult = await uploadFileToS3(
+        thumbnail.buffer,
+        thumbnail.originalname,
+        'thinklet_thumbnails',
+        thumbnail.mimetype
+      );
+      if (!uploadResult?.fileUrl) {
+        throw {
+          status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+          message: 'Failed to upload thumbnail',
+          code: 'THUMBNAIL_UPLOAD_FAILED',
+        };
+      }
+      thumbnailUrl = uploadResult.fileUrl;
+    }
 
-  return {
-    message: "article posted successfuly",
-    article: response
+    // Create new article
+    const newArticle = {
+      title: articleData.title,
+      description: articleData.description,
+      thumbnail: thumbnailUrl,
+      tags: articleData.tags || [],
+      category: articleData.category,
+      author: articleData.author,
+    };
 
-  };
+    const createdArticle = await Article.create(newArticle);
+    console.log('Article created:', createdArticle);
+
+    // Convert to ArticleResponseDTO
+    const articleResponse = await getArticleResponse(createdArticle._id.toString(), articleData.author);
+
+    return {
+      message: 'Article posted successfully',
+      article: articleResponse,
+    };
+  } catch (error: any) {
+    console.error('Error in articleCreate:', error);
+    throw {
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to create article',
+      code: error.code || 'CREATE_ARTICLE_ERROR',
+    };
+  }
 };
-
-}
 
 export const getPreferenceArticlesService = async (
   preferences: IPreference[],
@@ -163,23 +215,19 @@ export const getPreferenceArticlesService = async (
     }
 
     const preferenceIds = preferences.map((pref) => pref._id);
-
-    // Calculate skip for pagination
     const skip = (articleSet - 1) * limit;
 
-    // Fetch articles matching preferences (via category or tags)
     const articles = await Article.find({
       $or: [
         { category: { $in: preferenceIds } },
         { tags: { $in: preferences.map((pref) => pref.name) } },
       ],
     })
-      .sort({ createdAt: -1 }) // Sort by newest first
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    // Map articles to ArticleResponseDTO using getArticleResponse
     const formattedArticles = await Promise.all(
       articles.map(async (article) => {
         return await getArticleResponse(article._id.toString(), userId);
@@ -188,10 +236,28 @@ export const getPreferenceArticlesService = async (
 
     return { articles: formattedArticles };
   } catch (error: any) {
+    console.error('Error in getPreferenceArticlesService:', error);
     throw {
       status: HttpStatusCode.INTERNAL_SERVER_ERROR,
       message: error.message || 'Failed to fetch preference articles',
       code: 'FETCH_ARTICLES_ERROR',
+    };
+  }
+};
+
+export const getArticleService = async (articleId: string, userId?: string): Promise<ArticleResponseDTO> => {
+  try {
+    const articleResponse = await getArticleResponse(articleId, userId);
+
+    console.log('Article fetched in service:', articleResponse);
+    
+    return articleResponse;
+  } catch (error: any) {
+    console.error('Error in getArticleService:', error);
+    throw {
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to fetch article',
+      code: error.code || 'FETCH_ARTICLE_ERROR',
     };
   }
 };

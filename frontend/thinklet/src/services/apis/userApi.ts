@@ -66,20 +66,29 @@ export const logoutUser = async () => {
   }
 };
 
-export const getArticle = async (articleId:string)=>{
-  try{
 
-    const response =await userInstance.get(`${ROUTES.user.article}/${articleId}`);
-    return response.data ;
 
-  }catch(error:any){
-     console.error("Error in fetching article:", error);
+export const getArticle = async (articleId: string, userId?: string) => {
+  try {
+    console.log('In getArticle API with:', { articleId, userId });
+    const response = await userInstance.get(ROUTES.user.article, {
+      params: {
+        articleId,
+        userId, // Will be undefined if not provided
+      },
+    });
+
+    console.log('Article API response:', response);
+
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in fetching article:', error);
     throw {
-      message: error.response?.data?.message || "Failed fetch article",
-      code: error.response?.data?.code || "SERVER_ERROR"
+      message: error.response?.data?.message || 'Failed to fetch article',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
   }
-}
-
 };
 
 

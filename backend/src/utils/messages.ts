@@ -16,6 +16,7 @@ export const MESSAGES = {
   user: {
     notFound: "Article not found",
     articlesFetched: "Articles fetched successfully",
+    articleFetched: "Article fetched successfully",
   },
   doctor: {},
 

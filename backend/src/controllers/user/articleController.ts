@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { HttpStatusCode } from '../../utils/enum';
 import { MESSAGES } from '../../utils/messages';
-import { articleCreate, getPreferenceArticlesService } from '../../services/user/articleService';
+import { articleCreate, getArticleService, getPreferenceArticlesService } from '../../services/user/articleService';
 import { IPreference } from '../../dto/userDto';
 
 
@@ -103,3 +103,40 @@ export const getPreferenceArticlesController = async (req: Request, res: Respons
     });
   }
 };
+
+
+export const getArticleController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { articleId, userId } = req.query;
+
+    if (!articleId || typeof articleId !== 'string') {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID is required and must be a string',
+        code: 'MISSING_ARTICLE_ID',
+      };
+    }
+
+    // userId is optional, but if provided, it must be a string
+    if (userId && typeof userId !== 'string') {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'User ID must be a string',
+        code: 'INVALID_USER_ID',
+      };
+    }
+
+    const response = await getArticleService(articleId, userId as string | undefined);
+
+    console.log('Article fetched in controller......////:', response);
+
+    res.status(HttpStatusCode.OK).json({article:response});
+  } catch (error: any) {
+    console.error('Error in getArticleController:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
+  }
+};
+
