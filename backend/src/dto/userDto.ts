@@ -13,4 +13,10 @@ export interface userSignupRequestDto {
 export interface userLoginRequestDto{
     emailOrPhone:string;
     password:string;
+};
+
+
+export interface IPreference{
+  _id:string;
+  name:string;
 }

@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import { getSignedImageURL, uploadFileToS3 } from '../../helpers/uploadS3';
 import { HttpStatusCode } from '../../utils/enum';
 import { ArticleResponseDTO, IArticleData } from '../../dto/articleDto';
+import { IPreference } from '../../dto/userDto';
 
 
 interface IThumbnail {
@@ -114,25 +115,27 @@ if (!categoryExists) {
   };
 }
 
-  let thumUrl;
+  let thumUrl = 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/thinklet_thumbnails/download+(3).jfif'
+
 
   if (thumbnail) {
-    thumUrl = await uploadFileToS3(
+    let urls = await uploadFileToS3(
       thumbnail.buffer,
       thumbnail.originalname,
       "thinklet_thumbnails",
       thumbnail.mimetype
     );
-    };
-
-    let newArticle = {
-        title: articleData.title,
-        description: articleData.description,
-        thumbnail: thumUrl?.fileUrl,
-        tags: articleData.tags,
-        category: articleData.category,
-        author: articleData.author
-    };
+if (urls) {
+  thumUrl = urls.fileUrl;
+}
+let newArticle = {
+    title: articleData.title,
+    description: articleData.description,
+    thumbnail: thumUrl,
+    tags: articleData.tags,
+    category: articleData.category,
+    author: articleData.author
+};
 
 
     let response =  await Article.create(newArticle);
@@ -144,4 +147,51 @@ if (!categoryExists) {
     article: response
 
   };
+};
+
+}
+
+export const getPreferenceArticlesService = async (
+  preferences: IPreference[],
+  limit: number,
+  articleSet: number,
+  userId: string
+): Promise<{ articles: ArticleResponseDTO[] }> => {
+  try {
+    if (!preferences || preferences.length === 0) {
+      return { articles: [] };
+    }
+
+    const preferenceIds = preferences.map((pref) => pref._id);
+
+    // Calculate skip for pagination
+    const skip = (articleSet - 1) * limit;
+
+    // Fetch articles matching preferences (via category or tags)
+    const articles = await Article.find({
+      $or: [
+        { category: { $in: preferenceIds } },
+        { tags: { $in: preferences.map((pref) => pref.name) } },
+      ],
+    })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Map articles to ArticleResponseDTO using getArticleResponse
+    const formattedArticles = await Promise.all(
+      articles.map(async (article) => {
+        return await getArticleResponse(article._id.toString(), userId);
+      })
+    );
+
+    return { articles: formattedArticles };
+  } catch (error: any) {
+    throw {
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to fetch preference articles',
+      code: 'FETCH_ARTICLES_ERROR',
+    };
+  }
 };

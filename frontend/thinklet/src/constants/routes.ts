@@ -9,7 +9,8 @@ export const ROUTES = {
     logout: "/user/logout",
     category:"/user/category",
     article:"/user/article",
-    articleCreate:"/user/articleCreate"
+    articleCreate:"/user/articleCreate",
+    preferenceArticles : "/user/preferenceArticles",
     
   },
 

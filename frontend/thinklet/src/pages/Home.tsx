@@ -1,69 +1,67 @@
-// src/pages/Home.tsx (assuming pages folder)
-import { useState } from 'react';
+// src/pages/Home.tsx
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GridBackground } from '../components/gridBackground';
 import { Navbar } from '../components/Navbar';
 import { ArticleCard } from '../components/ArticleCard';
 import { type ArticleResponseDTO } from '../interfaces/article';
-import { type IUser } from '../interfaces/user';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../redux/store/store';
+import { getPreferenceArticles } from '../services/apis/userApi';
 
 export const Home = () => {
-  const [articles] = useState<ArticleResponseDTO[]>([
-    {
-      _id: '1',
-      title: 'The Future of Artificial Intelligence in Healthcare',
-      description: 'Exploring how AI is revolutionizing medical diagnostics, treatment planning, and patient care.',
-      thumbnail: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80',
-      tags: ['AI', 'Healthcare', 'Innovation'],
-      category: { _id: 'cat1', name: 'Technology' },
-      author: { _id: 'user1', firstName: 'Sarah', lastName: 'Johnson' },
-      likesCount: 245,
-      dislikesCount: 10,
-      userInteraction: { liked: false, disliked: false, blocked: false },
-      createdAt: new Date('2024-10-09'),
-      updatedAt: new Date('2024-10-09'),
-    },
-    {
-      _id: '2',
-      title: '10 Essential Tips for Marathon Training',
-      description: 'Whether you\'re a beginner or seasoned runner, these training tips will help you prepare.',
-      thumbnail: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80',
-      tags: ['Running', 'Fitness', 'Marathon'],
-      category: { _id: 'cat2', name: 'Sports' },
-      author: { _id: 'user2', firstName: 'Mike', lastName: 'Chen' },
-      likesCount: 189,
-      dislikesCount: 5,
-      userInteraction: { liked: false, disliked: false, blocked: false },
-      createdAt: new Date('2024-10-08'),
-      updatedAt: new Date('2024-10-08'),
-    },
-    // Add more dummy articles as needed
-  ]);
-
+  const limit = 5;
+  const [articleSet, setArticleSet] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [hasMore ] = useState(true);
-
-
+  const [hasMore, setHasMore] = useState(true);
+  const [articles, setArticles] = useState<ArticleResponseDTO[]>([]);
   const user = useSelector((state: RootState) => state.user.user);
- 
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      // Log user and preferences for debugging
+      console.log('User:', user);
+      console.log('Preferences:', user?.preferences);
+
+      if (!user?._id || !user?.preferences || user.preferences.length === 0) {
+        console.log('No user ID or preferences, skipping fetch');
+        setArticles([]);
+        setHasMore(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        console.log('Fetching articles with preferences:', user.preferences);
+        const response = await getPreferenceArticles(user.preferences, limit, articleSet, user._id);
+        console.log('API Response:', response);
+        if (response.articles.length === 0) {
+          setHasMore(false);
+        } else {
+          setArticles((prev) => (articleSet === 1 ? response.articles : [...prev, ...response.articles]));
+          setHasMore(response.articles.length === limit);
+        }
+      } catch (error: any) {
+        console.error('Error fetching preference articles:', error);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [user?._id, user?.preferences, articleSet]);
 
   const handleLoadMore = () => {
-    setLoading(true);
-    // Simulate API, later replace
-    setTimeout(() => {
-      setLoading(false);
-      // setHasMore(false); when no more
-    }, 1000);
+    if (!loading && hasMore) {
+      setArticleSet((prev) => prev + 1);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
       <GridBackground />
-      
       <Navbar />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 z-20">
         {/* Welcome Section */}
         <motion.div
@@ -72,7 +70,11 @@ export const Home = () => {
           className="mb-8 sm:mb-12"
         >
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">{user?user.firstName:"User"}</span>!
+            Welcome back,{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">
+              {user ? user.firstName : 'User'}
+            </span>
+            !
           </h1>
           <p className="text-sm sm:text-base text-gray-600">Discover articles based on your interests</p>
         </motion.div>
@@ -86,19 +88,23 @@ export const Home = () => {
         >
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <span className="text-xs sm:text-sm text-gray-600 font-medium">Your Interests:</span>
-            {user?.preferences.map((pref, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md"
-              >
-                {pref.name}
-              </span>
-            ))}
+            {user?.preferences?.length && user?.preferences?.length > 0 ? (
+              user.preferences.map((pref, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md"
+                >
+                  {pref.name}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs sm:text-sm text-gray-600">No preferences set</span>
+            )}
           </div>
         </motion.div>
 
         {/* Articles Grid */}
-        {articles.length === 0 ? (
+        {articles.length === 0 && !loading ? (
           <div className="text-center py-20">
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles available</h3>
             <p className="text-gray-600">Check back later or adjust your preferences.</p>

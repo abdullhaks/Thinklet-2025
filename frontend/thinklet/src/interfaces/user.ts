@@ -1,4 +1,4 @@
-export interface preference{
+export interface IPreference{
   _id:string;
   name:string;
 }
@@ -10,7 +10,7 @@ export interface IUser {
   phone?: string;
   email: string;
   profile?: string;
-  preferences: preference[]; 
+  preferences: IPreference[]; 
 };
 
 

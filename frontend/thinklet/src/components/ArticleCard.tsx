@@ -16,7 +16,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
   const [bookmarked, setBookmarked] = useState(false); // Local for now, as no bookmark in schema
   const navigate = useNavigate()
   const fullName = `${article.author.firstName} ${article.author.lastName}`;
-  const createdDate = article.createdAt.toLocaleDateString();
+  const createdDate = new Date(article.createdAt).toLocaleDateString();
 
   return (
     <motion.div
@@ -86,30 +86,27 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center space-x-4 sm:space-x-6">
-            <button
+            {/* <button
               onClick={() => setLiked(!liked)}
               className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
-            >
-              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} />
-              <span className="text-xs sm:text-sm font-medium">{article.likesCount}</span>
-            </button>
+            > */}
+              {/* <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} /> */}
+              <span className="text-xs sm:text-sm font-medium">Like {article.likesCount}</span>
+            {/* </button> */}
             
-            <button
-              onClick={() => setDisliked(!disliked)}
-              className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-red-600 transition-colors"
-            >
-              <ThumbsDown className={`w-4 h-4 sm:w-5 sm:h-5 ${disliked ? 'fill-red-600 text-red-600' : ''}`} />
-              <span className="text-xs sm:text-sm font-medium">{article.dislikesCount}</span>
-            </button>
+           
+              {/* <ThumbsDown className={`w-4 h-4 sm:w-5 sm:h-5 ${disliked ? 'fill-red-600 text-red-600' : ''}`} /> */}
+              <span className="text-xs sm:text-sm font-medium">Dislike {article.dislikesCount}</span>
+           
             {/* Removed comments as not in schema */}
           </div>
 
-          <button
+          {/* <button
             onClick={() => setBookmarked(!bookmarked)}
             className="text-gray-600 hover:text-purple-600 transition-colors"
           >
             <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${bookmarked ? 'fill-purple-600 text-purple-600' : ''}`} />
-          </button>
+          </button> */}
         </div>
       </div>
     </motion.div>
