@@ -6,6 +6,8 @@ import { Navbar } from '../components/Navbar';
 import { ArticleCard } from '../components/ArticleCard';
 import { type ArticleResponseDTO } from '../interfaces/article';
 import { type IUser } from '../interfaces/user';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../redux/store/store';
 
 export const Home = () => {
   const [articles] = useState<ArticleResponseDTO[]>([
@@ -43,13 +45,9 @@ export const Home = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore ] = useState(true);
 
-  const user: IUser = {
-    _id: 'user123',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    preferences: ['Technology', 'Health', 'Sports'],
-  };
+
+  const user = useSelector((state: RootState) => state.user.user);
+ 
 
   const handleLoadMore = () => {
     setLoading(true);
@@ -74,7 +72,7 @@ export const Home = () => {
           className="mb-8 sm:mb-12"
         >
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">{user.firstName}</span>!
+            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">{user?user.firstName:"User"}</span>!
           </h1>
           <p className="text-sm sm:text-base text-gray-600">Discover articles based on your interests</p>
         </motion.div>
@@ -88,12 +86,12 @@ export const Home = () => {
         >
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <span className="text-xs sm:text-sm text-gray-600 font-medium">Your Interests:</span>
-            {user.preferences.map((pref, index) => (
+            {user?.preferences.map((pref, index) => (
               <span
                 key={index}
                 className="px-3 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md"
               >
-                {pref}
+                {pref.name}
               </span>
             ))}
           </div>

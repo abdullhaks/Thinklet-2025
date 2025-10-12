@@ -50,7 +50,7 @@ export const createArticle = async (req: Request, res: Response): Promise<void> 
     
     res.status(HttpStatusCode.CREATED).json(response.article);
   } catch (error: any) {
-    console.error("Error in signup:", error);
+    console.error("Error create article :", error);
     res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       message: error.message || MESSAGES.server.serverError,
       code: error.code || 'SERVER_ERROR'

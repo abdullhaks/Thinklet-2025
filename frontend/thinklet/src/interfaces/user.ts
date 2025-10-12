@@ -1,3 +1,8 @@
+export interface preference{
+  _id:string;
+  name:string;
+}
+
 export interface IUser {
   _id: string;
   firstName: string;
@@ -5,7 +10,7 @@ export interface IUser {
   phone?: string;
   email: string;
   profile?: string;
-  preferences: string[]; 
+  preferences: preference[]; 
 };
 
 

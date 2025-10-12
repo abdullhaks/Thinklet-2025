@@ -1,4 +1,5 @@
 import User from '../../models/user';
+import Category from '../../models/category';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { userLoginRequestDto, userSignupRequestDto } from '../../dto/userDto';
@@ -113,9 +114,26 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
 
   const { password, ...rest } = existingUser.toJSON();
 
+  let preferences = await Promise.all(
+    rest.preferences.map(async (prefId) => {
+      let prefData = await Category.findOne({ _id: prefId });
+      return { _id: prefData?._id, name: prefData?.name };
+    })
+  );
+
+  let newUser = {
+    _id: rest._id,
+    firstName: rest.firstName,
+    lastName: rest.lastName,
+    phone: rest.phone,
+    email: rest.email,
+    profile: rest.profile || "",
+    preferences: preferences,
+  }
+
   return {
     message: 'Login successful',
-    user: rest,
+    user: newUser,
     accessToken,
     refreshToken,
   };
