@@ -9,6 +9,15 @@ interface IProfile {
   mimetype: string;
 }
 
+interface IProfileData {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  preferences: string[];
+}
+
 
 
 export const updateProfileImageService = async (userId: string, profile: IProfile | undefined): Promise<any> => {
@@ -76,3 +85,49 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
 
     }
     
+
+
+    export const updateProfileService = async (profileData: IProfileData): Promise<any> => {
+    const { userId, firstName, lastName, email, phone, preferences } = profileData;
+
+    const updatedData = await User.findByIdAndUpdate(
+        userId,
+        {
+            firstName,
+            lastName,
+            email,
+            phone,
+            preferences,
+        },
+        { new: true }
+    );
+
+    if (!updatedData) {
+        throw {
+            status: HttpStatusCode.NOT_FOUND,
+            message: 'User not found',
+            code: 'USER_NOT_FOUND',
+        };
+    }
+
+    let { password, ...rest } = updatedData.toObject();
+
+            let newPreferences = await Promise.all(
+                rest.preferences.map(async (prefId) => {
+                  let prefData = await Category.findOne({ _id: prefId });
+                  return { _id: prefData?._id, name: prefData?.name };
+                })
+              );
+
+    let newUser = {
+        _id: rest._id,
+        firstName: rest.firstName,
+        lastName: rest.lastName,
+        phone: rest.phone,
+        email: rest.email,
+        profile: rest.profile || "",
+        preferences: newPreferences,
+    };
+
+    return { userData: newUser };
+};

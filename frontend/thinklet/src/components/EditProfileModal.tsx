@@ -21,8 +21,8 @@ const profileSchema = z.object({
   firstName: z.string().trim().min(2, "First name must be at least 2 characters").max(50, "First name must be at most 50 characters"),
   lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50, "Last name must be at most 50 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format (e.g., +1234567890)").optional().or(z.literal("")),
-  preferences: z.array(z.string()).min(3, "Select at least 3 interests").max(5, "Select at most 5 interests"),
+  phone: z.string().regex(/^\+?[1-9]\d{1,10}$/, "Invalid phone number format (e.g., +1234567890)").optional().or(z.literal("")),
+  preferences: z.array(z.string()).min(3, "Select at least 3 interests").max(15, "Select at most 5 interests"),
 });
 
 const EditProfileModal = ({
@@ -73,7 +73,7 @@ const EditProfileModal = ({
     let newPreferences: string[];
     if (formData.preferences.includes(pref)) {
       newPreferences = formData.preferences.filter((p: string) => p !== pref);
-    } else if (formData.preferences.length < 5) {
+    } else if (formData.preferences.length < 15) {
       newPreferences = [...formData.preferences, pref];
     } else {
       return;
@@ -219,7 +219,7 @@ const EditProfileModal = ({
                 htmlFor="preferences"
                 className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5"
               >
-                Interests (Select 3 to 5) - {formData.preferences.length}/5
+                Interests (Select 3 to 15) - {formData.preferences.length}/15
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {availablePreferences.map((pref: any) => (

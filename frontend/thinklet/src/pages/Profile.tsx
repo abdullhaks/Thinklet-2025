@@ -30,10 +30,11 @@ export const Profile = () => {
     email: user?.email || "",
     phone: user?.phone || '',
     preferences: user?.preferences.map((item: any) => item._id) || [],
+    profile: user?.profile || '',
   });
   const [availablePreferences, setAvailablePreferences] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(profileData.profilePic || null);
+  const [previewImage, setPreviewImage] = useState<string | null>(profileData.profile || null);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -47,6 +48,20 @@ export const Profile = () => {
     };
     fetchingCategories();
   }, []);
+
+  useEffect(() => {
+    // Update profileData when user changes (e.g., after profile update)
+    setProfileData({
+      _id: user?._id || '',
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      phone: user?.phone || '',
+      preferences: user?.preferences.map((item: any) => item._id) || [],
+      profile: user?.profile || '',
+    });
+    setPreviewImage(user?.profile || null);
+  }, [user]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,19 +82,19 @@ export const Profile = () => {
 
   const handleCancelImageUpdate = () => {
     setSelectedImage(null);
-    setPreviewImage(profileData.profilePic || null);
+    setPreviewImage(profileData.profile || null);
     setErrors((prev) => ({ ...prev, profilePic: '' }));
   };
 
   const handleSaveImage = async () => {
     if (!selectedImage) return;
 
-    message.loading("profile updating..")
+    message.loading("Profile updating...");
     try {
       setIsUploading(true);
       const formData = new FormData();
       formData.append("profile", selectedImage);
-      formData.append("userId", user?._id||"");
+      formData.append("userId", user?._id || "");
 
       const response = await updateProfileImage(formData);
       const updatedUser = response.userData;
@@ -112,11 +127,12 @@ export const Profile = () => {
       }
 
       const response = await updateProfile(updatedData);
-      const updatedUser = response.updatedUser;
+      const updatedUser = response.userData;
 
       dispatch(updateUser(updatedUser));
       setProfileData(updatedUser);
       message.success("Profile updated successfully!");
+      setIsEditProfileModalOpen(false);
     } catch (error) {
       message.error("Failed to update profile.");
     }
@@ -124,7 +140,6 @@ export const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-   
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <button
@@ -152,7 +167,7 @@ export const Profile = () => {
                   />
                 ) : (
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-6xl ">
+                    <span className="text-white font-bold text-6xl">
                       {String(profileData.firstName.charAt(0)).toLocaleUpperCase()}
                     </span>
                   </div>
@@ -167,7 +182,7 @@ export const Profile = () => {
                   />
                 </label>
                 {Object.values(errors).map((item, idx) => (
-                    <p key={idx} className="text-red-600 text-sm">{item}</p>
+                  <p key={idx} className="text-red-600 text-sm">{item}</p>
                 ))}
               </div>
 

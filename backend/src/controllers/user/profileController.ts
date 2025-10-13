@@ -1,4 +1,4 @@
-import { updateProfileImageService } from "../../services/user/profileService";
+import { updateProfileImageService, updateProfileService } from "../../services/user/profileService";
 
 interface MulterFile {
   fieldname: string;
@@ -39,4 +39,33 @@ export const updateProfileImageController = async (req:any, res:any) => {
         console.error("Error in updating profile image:", error);
         return res.status(500).json({ message: "Internal server error", code: "SERVER_ERROR" });
     }   
+};
+
+
+export const updateProfileController = async (req: any, res: any) => {
+    try {
+        const { userId, firstName, lastName, email, phone, preferences } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required", code: "NO_USER_ID" });
+        }
+
+        const profileData = {
+            userId,
+            firstName,
+            lastName,
+            email,
+            phone,
+            preferences: preferences,
+        };
+
+        const response = await updateProfileService(profileData);
+        return res.status(200).json({ message: "Profile updated successfully", userData: response.userData });
+    } catch (error: any) {
+        console.error("Error in updating profile:", error);
+        return res.status(error.status || 500).json({
+            message: error.message || "Internal server error",
+            code: error.code || "SERVER_ERROR",
+        });
+    }
 };
