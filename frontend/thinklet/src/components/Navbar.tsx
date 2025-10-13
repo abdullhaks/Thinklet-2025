@@ -73,11 +73,21 @@ export const Navbar = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center space-x-2 focus:outline-none group"
               >
+                { user?.profile ? (
+                  <img
+                    src={user?.profile}
+                    alt="Profile"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-4 border-purple-100 shadow-md"
+                  />
+                ) : (
+
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center shadow-md ring-2 ring-white group-hover:ring-purple-200 transition-all">
                   <span className="text-white font-semibold text-sm sm:text-base">
                     {fullName.charAt(0)}
                   </span>
                 </div>
+               )}
+
               </button>
 
               <AnimatePresence>

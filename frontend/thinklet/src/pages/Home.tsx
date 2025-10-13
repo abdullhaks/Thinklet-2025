@@ -8,6 +8,7 @@ import { type ArticleResponseDTO } from '../interfaces/article';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../redux/store/store';
 import { getPreferenceArticles } from '../services/apis/userApi';
+import { message } from 'antd';
 
 export const Home = () => {
   const limit = 3;
@@ -29,7 +30,7 @@ export const Home = () => {
         setHasMore(false);
         return;
       }
-
+      message.loading("fetching articles..")
       setLoading(true);
       try {
         console.log('Fetching articles with preferences:', user.preferences);

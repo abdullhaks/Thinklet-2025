@@ -3,6 +3,7 @@ import { accessToken, login, logout, signup } from "../controllers/user/authCont
 import { categories } from "../controllers/user/categoryController";
 import { createArticle, deleteArticleController, dislikeArticleController, getArticleController, getMyArticleController, getPreferenceArticlesController, likeArticleController } from "../controllers/user/articleController";
 import { upload } from "../helpers/uploadS3";
+import { updateProfileImageController } from "../controllers/user/profileController";
 
 const userRouter = express.Router();
 
@@ -14,6 +15,12 @@ userRouter.get('/category',categories);
 userRouter.post('/articleCreate',upload.fields([
     { name: "thumbnail", maxCount: 1 },
   ]),createArticle);
+
+userRouter.put('/updateProfileImage',upload.fields([
+    { name: "profile", maxCount: 1 },
+  ]),updateProfileImageController); 
+
+  
 userRouter.get('/article', getArticleController);
 userRouter.delete('/article/:id',deleteArticleController);
 userRouter.get('/logout',logout);

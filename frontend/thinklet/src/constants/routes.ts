@@ -14,6 +14,8 @@ export const ROUTES = {
     likeArticle : "/user/likeArticle",
     dislikeArticle : "/user/dislikeArticle",
     myArticle:"/user/myArticle",
+    updateProfile : "/user/updateProfile",
+    updateProfileImage : "/user/updateProfileImage",
     
   },
 

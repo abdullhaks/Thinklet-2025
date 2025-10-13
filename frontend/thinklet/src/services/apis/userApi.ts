@@ -169,6 +169,31 @@ export const deleteArticle = async (articleId: string) => {
   }
 };
 
+export const updateProfile = async (profileData: any) => {
+  try {
+    const response = await userInstance.put(ROUTES.user.updateProfile, profileData);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in updating profile:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to update profile',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+}
+
+export const updateProfileImage = async (imageData: FormData) => {
+  try {
+    const response = await userInstance.put(ROUTES.user.updateProfileImage, imageData);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in updating profile image:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to update profile image',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+}
 
 
 export const likeArticle = async (articleId: string, userId: string) => {

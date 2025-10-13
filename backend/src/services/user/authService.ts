@@ -108,9 +108,6 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
     role: 'user',
   });
 
-  if (existingUser.profile) {
-    existingUser.profile = await getSignedImageURL(existingUser.profile);
-  }
 
   const { password, ...rest } = existingUser.toJSON();
 

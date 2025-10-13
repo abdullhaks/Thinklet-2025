@@ -47,11 +47,23 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
       <div className="p-4 sm:p-6">
         {/* Author Info */}
         <div className="flex items-center space-x-3 mb-3">
+
+           { article?.author?.profile ? (
+                  <img
+                    src={article?.author?.profile}
+                    alt="Profile"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-4 border-purple-100 shadow-md"
+                  />
+                ) : (
+
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
             <span className="text-white font-semibold text-xs sm:text-sm">
               {fullName.charAt(0)}
             </span>
           </div>
+
+                )}
+
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-800 truncate">{fullName}</p>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
