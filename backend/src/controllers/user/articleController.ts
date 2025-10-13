@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { HttpStatusCode } from '../../utils/enum';
 import { MESSAGES } from '../../utils/messages';
-import { articleCreate, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
+import { articleCreate, deleteArticleService, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
 import { IPreference } from '../../dto/userDto';
 
 
@@ -142,6 +142,29 @@ export const getMyArticleController = async (req: Request, res: Response): Promi
   }
 };
 
+export const deleteArticleController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID is required',
+        code: 'MISSING_ARTICLE_ID',
+      };
+    }
+    const response = await deleteArticleService(id);
+
+    res.status(HttpStatusCode.OK).json({
+      message: MESSAGES.user.articleDeleted
+    });
+  } catch (error: any) {
+    console.error('Error in deleteArticleController:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
+  }
+}
 
 
 

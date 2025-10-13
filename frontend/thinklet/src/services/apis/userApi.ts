@@ -154,6 +154,23 @@ export const getMyArticles = async (
   }
 };
 
+export const deleteArticle = async (articleId: string) => {
+  try {
+
+    const response = await userInstance.delete(`${ROUTES.user.article}/${articleId}`);
+    return response.data;
+  }
+  catch (error: any) {
+    console.error('Error in deleting article:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to delete article',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+};
+
+
+
 export const likeArticle = async (articleId: string, userId: string) => {
   try {
     console.log('In likeArticle API with:', { articleId, userId });

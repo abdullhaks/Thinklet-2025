@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit, Trash2, Calendar, Heart } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { type ArticleResponseDTO } from '../interfaces/article';
-import { getMyArticles } from '../services/apis/userApi';
+import { deleteArticle, getMyArticles } from '../services/apis/userApi';
 import type { RootState } from '../redux/store/store';
 import { useSelector } from 'react-redux';
-import { message } from 'antd';
+import { message, Popconfirm } from 'antd';
 
 export const ArticleList = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export const ArticleList = () => {
 
   useEffect(()=>{
     let fetchMyArticles = async ()=>{
-
+      message.loading("fetching your articles...")
       try{
           let response = await getMyArticles(user?._id || "");
           if (response.articles.length) {
@@ -40,10 +40,15 @@ export const ArticleList = () => {
   },[user?._id])
 
 
-  const handleDelete = (/*id: string*/) => {
-    if (confirm('Are you sure you want to delete this article?')) {
-      // setArticles(articles.filter(a => a._id !== id));
-      alert('Article deleted!');
+  const handleDelete = async(id: string) => {
+    
+    let response = await deleteArticle(id);
+
+    if(response){
+      message.success(response.message||"article deleted");
+      setArticles((prev)=>prev.filter((article)=>article._id !== id));
+    }else{
+      message.error("deleting article failed. please try later!")
     }
   };
 
@@ -123,13 +128,26 @@ export const ArticleList = () => {
                     <Edit className="w-4 h-4" />
                     <span>Edit</span>
                   </button>
+
+
+                <Popconfirm
+                    title="Delete Article"
+                    description={`Are you sure about delete this article ?`}
+                    onConfirm={() => handleDelete(article._id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+
                   <button
-                    onClick={() => handleDelete(/*article._id*/)}
+               
                     className="flex-1 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center space-x-2 text-sm font-semibold"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>Delete</span>
                   </button>
+
+        </Popconfirm>
+
                 </div>
               </div>
             </motion.div>

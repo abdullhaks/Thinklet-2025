@@ -19,6 +19,7 @@ export const MESSAGES = {
     articleFetched: "Article fetched successfully",
     likeSuccess: "Article liked successfully",
     dislikeSuccess: "Article disliked successfully",
+    articleDeleted: "Article deleted successfully",
   },
   doctor: {},
 

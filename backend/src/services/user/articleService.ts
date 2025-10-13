@@ -276,7 +276,33 @@ export const getMyArticleService = async (
   }
 };
 
-
+export const deleteArticleService = async (articleId: string): Promise<{ message: string }> => {
+  try {
+    if (!articleId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'Article ID is required',
+        code: 'MISSING_ARTICLE_ID',
+      };
+    }
+    const deletedArticle = await Article.findByIdAndDelete(articleId);
+    if (!deletedArticle) {
+      throw {
+        status: HttpStatusCode.NOT_FOUND,
+        message: 'Article not found',
+        code: 'ARTICLE_NOT_FOUND',
+      };
+    }
+    return { message: 'Article deleted successfully' };
+  } catch (error: any) {
+    console.error('Error in deleteArticleService:', error);
+    throw {
+      status: error.status || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to delete article',
+      code: error.code || 'DELETE_ARTICLE_ERROR',
+    };
+  }
+}
 
 
 export const getArticleService = async (articleId: string, userId?: string): Promise<ArticleResponseDTO> => {
