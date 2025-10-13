@@ -115,7 +115,7 @@ export const ArticleView = () => {
     if (navigator.share) {
       navigator.share({ title: article?.title, url: window.location.href });
     } else {
-      alert('Share link copied!');
+      message.success('Share link copied!');
     }
   };
 
