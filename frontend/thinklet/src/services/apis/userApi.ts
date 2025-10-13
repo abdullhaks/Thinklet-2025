@@ -41,7 +41,7 @@ export const loginUser = async (userData: any) => {
 
 export const accessToken = async () => {
   try {
-    const response = await userInstance.post(ROUTES.user.accessToken);
+    const response = await userInstance.get(ROUTES.user.accessToken);
 
     console.log("user api response is ", response);
 

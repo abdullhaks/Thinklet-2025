@@ -8,7 +8,7 @@ import axios, {
 import { persistor,store } from "../redux/store/store";
 import { logoutUser } from "../redux/slices/userSlice"; 
 
-import {accessToken as userRefreshToken, logoutUser as userLogout,} from "../services/apis/userApi";
+import {accessToken as userAccessToken, logoutUser as userLogout,} from "../services/apis/userApi";
 
 
 import { HttpStatusCode } from "./enum";
@@ -82,7 +82,7 @@ const handleTokenRefresh = async (
 
     switch (role) {
       case "user":
-        response = await userRefreshToken();
+        response = await userAccessToken();
         break;
    
       // case "admin":

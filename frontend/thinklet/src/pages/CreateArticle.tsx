@@ -5,9 +5,10 @@ import { ArrowLeft, Camera, X } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { message } from 'antd';
 import { z } from 'zod';
-import { createArticle, getCategories } from '../services/apis/userApi';
+import { createArticle, getArticle, getCategories } from '../services/apis/userApi';
 import { useSelector } from 'react-redux';
 import type { IUser } from '../interfaces/user';
+import type { ArticleResponseDTO } from '../interfaces/article';
 
 interface CreateArticleProps {
   editMode?: boolean;
@@ -50,14 +51,36 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
-  const [formData, setFormData] = useState<Partial<ArticleData>>(editMode ? 
+  const [articleForEdit,setArticleForEdit] = useState<ArticleResponseDTO | null>(null)
+
+  useEffect(() => {
+      const fetchArticle = async () => {
+        if (!articleId || editMode!=true) {
+          message.error('Article ID is missing');
+          return;
+        }
+  
+        try {
+          const response = await getArticle(articleId, user?._id);
+          console.log('Article from frontend:', response);
+          setArticleForEdit(response.article);
+        } catch (error: any) {
+          message.error(error.message || 'Failed to fetch article');
+        }
+      };
+  
+      fetchArticle();
+    }, [articleId, user?._id]);
+
+
+  const [formData, setFormData] = useState<Partial<ArticleData>>(editMode && articleForEdit ? 
     {
-      title: 'Existing Title',
-      description: 'Existing Description',
-      category: 'cat1',
-      tags: ['tag1', 'tag2'],
-      thumbnail: null,
-      author: user?._id || 'unknown',
+      title: articleForEdit.title,
+      description: articleForEdit.description,
+      category: articleForEdit.category.name || '',
+      tags: articleForEdit.tags,
+      // thumbnail: articleForEdit.thumbnail?articleForEdit.thumbnail:null ,
+      author: articleForEdit.author._id,
     } : {
       title: '',
       description: '',

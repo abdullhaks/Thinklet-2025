@@ -54,12 +54,28 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
       role: "user",
     });
 
+let preferences = await Promise.all(
+    rest.preferences.map(async (prefId) => {
+      let prefData = await Category.findOne({ _id: prefId });
+      return { _id: prefData?._id, name: prefData?.name };
+    })
+  );
+
+  let newUser = {
+    _id: rest._id,
+    firstName: rest.firstName,
+    lastName: rest.lastName,
+    phone: rest.phone,
+    email: rest.email,
+    profile: rest.profile || "",
+    preferences: preferences,
+  }
 
   
 
   return {
     message: "Signup successful",
-    user: rest,
+    user: newUser,
     accessToken,
     refreshToken
   };

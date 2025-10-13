@@ -27,6 +27,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         secure: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
       });
+      
     res.status(HttpStatusCode.CREATED).json(response.user);
   } catch (error: any) {
     console.error("Error in signup:", error);
@@ -107,16 +108,16 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
 
   export const accessToken =  async (req: Request, res: Response): Promise<void> => {
     try {
-      const { refreshToken } = req.cookies;
+      const { thinklet_refreshToken } = req.cookies;
 
-      if (!refreshToken) {
+      if (!thinklet_refreshToken) {
         res
           .status(HttpStatusCode.UNAUTHORIZED)
           .json({ msg: "refresh token not found" });
         return;
       }
 
-      const result = await getAccessToken(refreshToken);
+      const result = await getAccessToken(thinklet_refreshToken);
 
       console.log("result from ctrl is ...", result);
 
@@ -131,7 +132,7 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
 
       console.log("result from ctrl is afrt destructr...", accessToken);
 
-      res.cookie("accessToken", accessToken, {
+      res.cookie("thinklet_accessToken", accessToken, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
