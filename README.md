@@ -74,7 +74,7 @@ Tech Stack (Frontend)
 
 
 3 Configure Environment Variables
-MONGODB_URL=mongodb+srv://aks4u786_db_user:UktokCn1wQBu9hP5@cluster0.bxsyrgx.mongodb.net/ThinkletDB
+MONGODB_URL=
 
 PORT=3000
 
@@ -83,10 +83,10 @@ REFRESH_TOKEN_SECRET="thinklet_refreshtokensecret"
 
 MAX_AGE=604800000
 
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=ap-south-1
-AWS_BUCKET_NAME=myhealth-app-storage
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+AWS_BUCKET_NAME
 
 TEST_URL=http://localhost:4173
 DEV_URL=http://localhost:5173
@@ -170,3 +170,4 @@ Create a feature branch (git checkout -b feature/YourFeature).
 Commit changes (git commit -m 'Add YourFeature').
 Push to the branch (git push origin feature/YourFeature).
 Open a Pull Request.
+
