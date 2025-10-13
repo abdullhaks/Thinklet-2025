@@ -1,7 +1,7 @@
 import express from "express"
 import { accessToken, login, logout, signup } from "../controllers/user/authController";
 import { categories } from "../controllers/user/categoryController";
-import { createArticle, dislikeArticleController, getArticleController, getPreferenceArticlesController, likeArticleController } from "../controllers/user/articleController";
+import { createArticle, dislikeArticleController, getArticleController, getMyArticleController, getPreferenceArticlesController, likeArticleController } from "../controllers/user/articleController";
 import { upload } from "../helpers/uploadS3";
 
 const userRouter = express.Router();
@@ -19,6 +19,7 @@ userRouter.get('/logout',logout);
 userRouter.get('/preferenceArticles',getPreferenceArticlesController);
 userRouter.post('/likeArticle', likeArticleController);
 userRouter.post('/dislikeArticle', dislikeArticleController);
+userRouter.get('/myArticle',getMyArticleController);
 
 // userRouter.delete('/article/:id');
 // userRouter.patch('/article');

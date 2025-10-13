@@ -117,8 +117,6 @@ export const getArticleResponse = async (articleId: string, userId?: string): Pr
       updatedAt: typedArticle.updatedAt,
     };
 
-
-    console.log("Article Response:", response);
     
     return response;
   } catch (error: any) {
@@ -244,6 +242,42 @@ export const getPreferenceArticlesService = async (
     };
   }
 };
+
+
+
+export const getMyArticleService = async (
+  userId: string
+): Promise<{ articles: ArticleResponseDTO[] }> => {
+  try {
+
+
+    // const skip = (articleSet - 1) * limit;
+
+    const articles = await Article.find({ author: userId })
+      // .sort({ createdAt: -1 })
+      // .skip(skip)
+      // .limit(limit)
+      // .lean();
+
+    const formattedArticles = await Promise.all(
+      articles.map(async (article) => {
+        return await getArticleResponse(article._id.toString(), userId);
+      })
+    );
+
+    return { articles: formattedArticles };
+  } catch (error: any) {
+    console.error('Error in getPreferenceArticlesService:', error);
+    throw {
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || 'Failed to fetch preference articles',
+      code: 'FETCH_ARTICLES_ERROR',
+    };
+  }
+};
+
+
+
 
 export const getArticleService = async (articleId: string, userId?: string): Promise<ArticleResponseDTO> => {
   try {

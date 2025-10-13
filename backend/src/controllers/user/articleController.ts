@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { HttpStatusCode } from '../../utils/enum';
 import { MESSAGES } from '../../utils/messages';
-import { articleCreate, dislikeArticleService, getArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
+import { articleCreate, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
 import { IPreference } from '../../dto/userDto';
 
 
@@ -103,6 +103,46 @@ export const getPreferenceArticlesController = async (req: Request, res: Respons
     });
   }
 };
+
+
+
+export const getMyArticleController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {userId} = req.query;
+    console.log("userId...",userId);
+    
+
+    // Validate preferences
+    if (!userId) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: 'fetching atricles failed',
+        code: 'INVALID_PREFERENCES',
+      };
+    }
+    // const parsedLimit = parseInt(limit as string, 10);
+    // const parsedArticleSet = parseInt(articleSet as string, 10);
+
+
+
+    const response = await getMyArticleService(userId.toString());
+
+    console.log("my articles are ",response.articles)
+
+    res.status(HttpStatusCode.OK).json({
+      message: MESSAGES.user.articlesFetched,
+      articles: response.articles,
+    });
+  } catch (error: any) {
+    console.error('Error in getPreferenceArticlesController:', error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || 'SERVER_ERROR',
+    });
+  }
+};
+
+
 
 
 export const getArticleController = async (req: Request, res: Response): Promise<void> => {

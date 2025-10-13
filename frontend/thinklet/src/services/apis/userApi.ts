@@ -132,6 +132,28 @@ export const getPreferenceArticles = async (
   }
 };
 
+
+export const getMyArticles = async (
+  // limit: number,
+  // articleSet: number,
+  userId: string
+) => {
+  try {
+    const response = await userInstance.get(ROUTES.user.myArticle, {
+      params: {
+        userId,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in fetching preference articles:', error);
+    throw {
+      message: error.response?.data?.message || 'Failed to fetch preference articles',
+      code: error.response?.data?.code || 'SERVER_ERROR',
+    };
+  }
+};
+
 export const likeArticle = async (articleId: string, userId: string) => {
   try {
     console.log('In likeArticle API with:', { articleId, userId });

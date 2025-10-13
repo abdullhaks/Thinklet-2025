@@ -10,7 +10,7 @@ import type { RootState } from '../redux/store/store';
 import { getPreferenceArticles } from '../services/apis/userApi';
 
 export const Home = () => {
-  const limit = 5;
+  const limit = 3;
   const [articleSet, setArticleSet] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);

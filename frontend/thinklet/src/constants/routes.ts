@@ -12,7 +12,8 @@ export const ROUTES = {
     articleCreate:"/user/articleCreate",
     preferenceArticles : "/user/preferenceArticles",
     likeArticle : "/user/likeArticle",
-    dislikeArticle : "/user/dislikeArticle"
+    dislikeArticle : "/user/dislikeArticle",
+    myArticle:"/user/myArticle",
     
   },
 

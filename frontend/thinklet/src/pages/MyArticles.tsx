@@ -1,30 +1,44 @@
 // src/pages/ArticleList.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit, Trash2, Calendar, Heart } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { type ArticleResponseDTO } from '../interfaces/article';
+import { getMyArticles } from '../services/apis/userApi';
+import type { RootState } from '../redux/store/store';
+import { useSelector } from 'react-redux';
+import { message } from 'antd';
 
 export const ArticleList = () => {
-  const navigate = useNavigate()
-  const [articles] = useState<ArticleResponseDTO[]>([
-    {
-      _id: '1',
-      title: 'The Future of Artificial Intelligence',
-      description: 'Description here',
-      tags: [],
-      category: { _id: 'cat1', name: 'Technology' },
-      author: { _id: 'user123', firstName: 'John', lastName: 'Doe' },
-      likesCount: 245,
-      dislikesCount: 10,
-      userInteraction: { liked: false, disliked: false, blocked: false },
-      createdAt: new Date('2024-10-05'),
-      updatedAt: new Date('2024-10-05'),
-      thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80',
-    },
-    // Add more
-  ]); // Dummy, later API. Removed status/views as not in schema
+  const navigate = useNavigate();
+  const [articles,setArticles] = useState<ArticleResponseDTO[]>([]);
+  const user = useSelector((state: RootState) => state.user.user);
+
+
+
+
+  useEffect(()=>{
+    let fetchMyArticles = async ()=>{
+
+      try{
+          let response = await getMyArticles(user?._id || "");
+          if (response.articles.length) {
+          setArticles(response.articles);
+          }else{
+            message.warning("no articles yet")
+          }
+
+
+      }catch(error){
+            message.error("fetching your articles failed. please try later!")
+
+      }
+    };
+
+    fetchMyArticles()
+  },[user?._id])
+
 
   const handleDelete = (/*id: string*/) => {
     if (confirm('Are you sure you want to delete this article?')) {
@@ -64,9 +78,12 @@ export const ArticleList = () => {
               key={article._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border border-purple-50 overflow-hidden"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border border-purple-50 overflow-hidden "
             >
-              <div className="relative h-48">
+              <div className="relative h-48 cursor-pointer" 
+              onClick={()=>navigate(`/article/${article._id}`)}
+              
+              >
                 <img
                   src={article.thumbnail}
                   alt={article.title}
@@ -79,7 +96,11 @@ export const ArticleList = () => {
                   {article.category.name}
                 </span>
                 
-                <h3 className="text-lg font-bold text-gray-900 mt-3 mb-2 line-clamp-2">
+                <h3 className="text-lg font-bold text-gray-900 mt-3 mb-2 line-clamp-2 cursor-pointer"
+                onClick={()=>navigate(`/article/${article._id}`)}
+                
+                >
+                  
                   {article.title}
                 </h3>
 
@@ -90,7 +111,7 @@ export const ArticleList = () => {
                   </div>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
-                    <span>{article.createdAt.toLocaleDateString()}</span>
+                    <span>{ new Date(article.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
