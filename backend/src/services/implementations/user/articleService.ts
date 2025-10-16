@@ -1,17 +1,34 @@
 // src/services/user/articleService.ts
-import Article from '../../models/article';
-import Interaction from '../../models/interaction';
-import Category from '../../models/category';
-import { uploadFileToS3 } from '../../helpers/uploadS3';
-import { HttpStatusCode } from '../../utils/enum';
-import { ArticleResponseDTO, IArticleData } from '../../dto/articleDto';
-import { IPreference } from '../../dto/userDto';
+import Article from '../../../models/article';
+import Interaction from '../../../models/interaction';
+import Category from '../../../models/category';
+import { uploadFileToS3 } from '../../../helpers/uploadS3';
+import { HttpStatusCode } from '../../../utils/enum';
+import { ArticleResponseDTO, IArticleData } from '../../../dto/articleDto';
+import { IPreference } from '../../../dto/userDto';
+import { inject,injectable } from 'inversify';
+import IArticleService from '../../interfaces/user/IArticleService';
 
 interface IThumbnail {
   buffer: Buffer;
   originalname: string;
   mimetype: string;
-}
+};
+
+
+injectable();
+
+// export default class ArticleService implements IArticleService {
+
+//   constructor (
+//     @inject("IArticleRepository") private _articleRepsitory : IAritcleRepository
+//   ){}
+
+
+
+// }
+
+
 
 
 interface aggregationResult   {

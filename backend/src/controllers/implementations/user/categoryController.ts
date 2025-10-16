@@ -2,9 +2,9 @@
 
 import { Request, Response } from 'express';
 
-import { HttpStatusCode } from '../../utils/enum';
-import { MESSAGES } from '../../utils/messages';
-import { getCategories } from '../../services/user/categoryService';
+import { HttpStatusCode } from '../../../utils/enum';
+import { MESSAGES } from '../../../utils/messages';
+import { getCategories } from '../../../services/implementations/user/categoryService';
 
 export const categories = async (req: Request, res: Response): Promise<void> => {
   try {

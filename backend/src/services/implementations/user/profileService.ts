@@ -1,7 +1,7 @@
-import { uploadFileToS3 } from "../../helpers/uploadS3";
-import Category from "../../models/category";
-import User from "../../models/user";
-import { HttpStatusCode } from "../../utils/enum";
+import { uploadFileToS3 } from "../../../helpers/uploadS3";
+import Category from "../../../models/category";
+import User from "../../../models/user";
+import { HttpStatusCode } from "../../../utils/enum";
 
 interface IProfile {
   buffer: Buffer;

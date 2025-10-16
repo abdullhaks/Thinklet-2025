@@ -1,9 +1,9 @@
 import express from "express"
-import { accessToken, login, logout, signup } from "../controllers/user/authController";
-import { categories } from "../controllers/user/categoryController";
-import { createArticle, deleteArticleController, dislikeArticleController, getArticleController, getMyArticleController, getPreferenceArticlesController, likeArticleController } from "../controllers/user/articleController";
+import { accessToken, login, logout, signup } from "../controllers/implementations/user/authController";
+import { categories } from "../controllers/implementations/user/categoryController";
+import { createArticle, deleteArticleController, dislikeArticleController, getArticleController, getMyArticleController, getPreferenceArticlesController, likeArticleController } from "../controllers/implementations/user/articleController";
 import { upload } from "../helpers/uploadS3";
-import { updateProfileController, updateProfileImageController } from "../controllers/user/profileController";
+import { updateProfileController, updateProfileImageController } from "../controllers/implementations/user/profileController";
 import { verifyAccessTokenMidleware } from "../middlewares.ts/checkAccessToken";
 
 const userRouter = express.Router();

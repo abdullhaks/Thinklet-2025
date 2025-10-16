@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { loginUser, signupUser,getAccessToken } from '../../services/user/authService';
-import { HttpStatusCode } from '../../utils/enum';
-import { MESSAGES } from '../../utils/messages';
+import { loginUser, signupUser,getAccessToken } from '../../../services/implementations/user/authService';
+import { HttpStatusCode } from '../../../utils/enum';
+import { MESSAGES } from '../../../utils/messages';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   try {

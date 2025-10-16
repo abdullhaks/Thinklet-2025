@@ -1,4 +1,4 @@
-import { updateProfileImageService, updateProfileService } from "../../services/user/profileService";
+import { updateProfileImageService, updateProfileService } from "../../../services/implementations/user/profileService";
 
 interface MulterFile {
   fieldname: string;

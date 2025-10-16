@@ -1,7 +1,8 @@
 // src/models/articleModel.ts
 import { Schema, model } from 'mongoose';
+import { IArticleDocument } from '../entities/articleEntity';
 
-const articleSchema = new Schema({
+const articleSchema:Schema<IArticleDocument> = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   thumbnail:{type:String,
@@ -12,6 +13,7 @@ const articleSchema = new Schema({
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 
-const Article = model('Article', articleSchema);
+const Article = model<IArticleDocument>('Article', articleSchema);
+
 
 export default Article

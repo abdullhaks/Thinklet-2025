@@ -1,11 +1,11 @@
-import User from '../../models/user';
-import Category from '../../models/category';
+import User from '../../../models/user';
+import Category from '../../../models/category';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { userLoginRequestDto, userSignupRequestDto } from '../../dto/userDto';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt';
-import { getSignedImageURL } from '../../helpers/uploadS3';
-import { HttpStatusCode } from '../../utils/enum';
+import { userLoginRequestDto, userSignupRequestDto } from '../../../dto/userDto';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../../utils/jwt';
+import { getSignedImageURL } from '../../../helpers/uploadS3';
+import { HttpStatusCode } from '../../../utils/enum';
 
 
 export const signupUser = async (userData: userSignupRequestDto): Promise<any> => {

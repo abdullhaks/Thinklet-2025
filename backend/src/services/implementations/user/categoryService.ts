@@ -1,5 +1,5 @@
-import Category from '../../models/category';
-import { HttpStatusCode } from '../../utils/enum';
+import Category from '../../../models/category';
+import { HttpStatusCode } from '../../../utils/enum';
 
 
 export const getCategories = async (): Promise<any> => {

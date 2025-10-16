@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 
-import { HttpStatusCode } from '../../utils/enum';
-import { MESSAGES } from '../../utils/messages';
-import { articleCreate, deleteArticleService, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../services/user/articleService';
-import { IPreference } from '../../dto/userDto';
+import { HttpStatusCode } from '../../../utils/enum';
+import { MESSAGES } from '../../../utils/messages';
+import { articleCreate, deleteArticleService, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../../services/implementations/user/articleService';
+import { IPreference } from '../../../dto/userDto';
 
 
 interface MulterFile {
@@ -22,7 +22,6 @@ type MulterFiles = {
 
 
 export const createArticle = async (req: Request, res: Response): Promise<void> => {
-
 
   console.log("herere.e.e...e. bakend.....")
 
