@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
-
-import { HttpStatusCode } from '../../../utils/enum';
-import { MESSAGES } from '../../../utils/messages';
-import { articleCreate, deleteArticleService, dislikeArticleService, getArticleService, getMyArticleService, getPreferenceArticlesService, likeArticleService } from '../../../services/implementations/user/articleService';
-import { IPreference } from '../../../dto/userDto';
-
+import { Request, Response } from "express";
+import { inject, injectable } from "inversify";
+import { HttpStatusCode } from "../../../utils/enum";
+import { MESSAGES } from "../../../utils/messages";
+import { IPreference } from "../../../dto/userDto";
+import IArticleController from "../../interfaces/user/IArticleController";
+import IArticleService from "../../../services/interfaces/user/IArticleService";
 
 interface MulterFile {
   fieldname: string;
@@ -19,243 +19,279 @@ type MulterFiles = {
   [fieldname: string]: MulterFile[];
 };
 
-
-
-export const createArticle = async (req: Request, res: Response): Promise<void> => {
-
-  console.log("herere.e.e...e. bakend.....")
-
-  try {
-    const { title,description, category, tags, author  } = req.body;
-
-    const articleDetail = { title,description, category, tags, author }
-
-    console.log("articleDetail  is ", articleDetail);
-
-    const thumbnailFile = (req.files as MulterFiles)
-        ?.thumbnail?.[0];
-
-
-     
-      const thumbnail =  thumbnailFile
-          ? {
-              buffer: thumbnailFile.buffer,
-              originalname: thumbnailFile.originalname,
-              mimetype: thumbnailFile.mimetype,
-            }
-          : undefined
-
-    const response = await articleCreate (articleDetail,thumbnail);
-
-    
-    res.status(HttpStatusCode.CREATED).json(response.article);
-  } catch (error: any) {
-    console.error("Error create article :", error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR'
-    });
+@injectable()
+export default class ArticleController implements IArticleController {
+  constructor(
+    @inject("IArticleService") private _articleService: IArticleService
+  ) {
+      console.log(
+      "ArticleService constructor - _articleRepository:",
+      !!this._articleService
+    );
   }
-};
 
+  async createArticle(req: Request, res: Response): Promise<void> {
+    console.log("herere.e.e...e. bakend.....");
 
-export const getPreferenceArticlesController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { preferences,userId, limit = 5, articleSet = 1 } = req.query;
+    try {
+      const { title, description, category, tags, author } = req.body;
 
-    console.log("preference...",preferences);
-    console.log("userId...",userId);
-    
+      const articleDetail = { title, description, category, tags, author };
 
-    // Validate preferences
-    if (!userId || !preferences || !Array.isArray(JSON.parse(preferences as string))) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Preferences must be provided as an array',
-        code: 'INVALID_PREFERENCES',
-      };
+      console.log("articleDetail  is ", articleDetail);
+
+      const thumbnailFile = (req.files as MulterFiles)?.thumbnail?.[0];
+
+      const thumbnail = thumbnailFile
+        ? {
+            buffer: thumbnailFile.buffer,
+            originalname: thumbnailFile.originalname,
+            mimetype: thumbnailFile.mimetype,
+          }
+        : undefined;
+
+      const response = await this._articleService.articleCreate(
+        articleDetail,
+        thumbnail
+      );
+
+      res.status(HttpStatusCode.CREATED).json(response.article);
+    } catch (error: any) {
+      console.error("Error create article :", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
     }
-
-    const parsedPreferences: IPreference[] = JSON.parse(preferences as string);
-    const parsedLimit = parseInt(limit as string, 10);
-    const parsedArticleSet = parseInt(articleSet as string, 10);
-
-    if (isNaN(parsedLimit) || isNaN(parsedArticleSet) || parsedLimit <= 0 || parsedArticleSet <= 0) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Invalid limit or articleSet',
-        code: 'INVALID_PAGINATION',
-      };
-    }
-
-    const response = await getPreferenceArticlesService(parsedPreferences, parsedLimit, parsedArticleSet,userId.toString());
-
-    res.status(HttpStatusCode.OK).json({
-      message: MESSAGES.user.articlesFetched,
-      articles: response.articles,
-    });
-  } catch (error: any) {
-    console.error('Error in getPreferenceArticlesController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
   }
-};
 
+  async getPreferenceArticlesController(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { preferences, userId, limit = 5, articleSet = 1 } = req.query;
+      console.log(
+        "ArticleController constructor - _articleService:",
+        !!this._articleService
+      );
 
+      console.log("preference...", preferences);
+      console.log(
+        "userId...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        userId
+      );
 
-export const getMyArticleController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const {userId} = req.query;
-    console.log("userId...",userId);
-    
+      // Validate preferences
+      if (
+        !userId ||
+        !preferences ||
+        !Array.isArray(JSON.parse(preferences as string))
+      ) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Preferences must be provided as an array",
+          code: "INVALID_PREFERENCES",
+        };
+      }
 
-    // Validate preferences
-    if (!userId) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'fetching atricles failed',
-        code: 'INVALID_PREFERENCES',
-      };
+      const parsedPreferences: IPreference[] = JSON.parse(
+        preferences as string
+      );
+      const parsedLimit = parseInt(limit as string, 10);
+      const parsedArticleSet = parseInt(articleSet as string, 10);
+
+      if (
+        isNaN(parsedLimit) ||
+        isNaN(parsedArticleSet) ||
+        parsedLimit <= 0 ||
+        parsedArticleSet <= 0
+      ) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Invalid limit or articleSet",
+          code: "INVALID_PAGINATION",
+        };
+      }
+
+      const response = await this._articleService.getPreferenceArticlesService(
+        parsedPreferences,
+        parsedLimit,
+        parsedArticleSet,
+        userId.toString()
+      );
+
+      res.status(HttpStatusCode.OK).json({
+        message: MESSAGES.user.articlesFetched,
+        articles: response.articles,
+      });
+    } catch (error: any) {
+      console.error("Error in getPreferenceArticlesController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
     }
-    // const parsedLimit = parseInt(limit as string, 10);
-    // const parsedArticleSet = parseInt(articleSet as string, 10);
-
-
-
-    const response = await getMyArticleService(userId.toString());
-
-    console.log("my articles are ",response.articles)
-
-    res.status(HttpStatusCode.OK).json({
-      message: MESSAGES.user.articlesFetched,
-      articles: response.articles,
-    });
-  } catch (error: any) {
-    console.error('Error in getPreferenceArticlesController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
   }
-};
 
-export const deleteArticleController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    if (!id) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Article ID is required',
-        code: 'MISSING_ARTICLE_ID',
-      };
+  async getMyArticleController(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.query;
+      console.log("userId...", userId);
+
+      // Validate preferences
+      if (!userId) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "fetching atricles failed",
+          code: "INVALID_PREFERENCES",
+        };
+      }
+      // const parsedLimit = parseInt(limit as string, 10);
+      // const parsedArticleSet = parseInt(articleSet as string, 10);
+
+      const response = await this._articleService.getMyArticleService(
+        userId.toString()
+      );
+
+      console.log("my articles are ", response.articles);
+
+      res.status(HttpStatusCode.OK).json({
+        message: MESSAGES.user.articlesFetched,
+        articles: response.articles,
+      });
+    } catch (error: any) {
+      console.error("Error in getPreferenceArticlesController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
     }
-    const response = await deleteArticleService(id);
+  }
 
-    res.status(HttpStatusCode.OK).json({
-      message: MESSAGES.user.articleDeleted
-    });
-  } catch (error: any) {
-    console.error('Error in deleteArticleController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
+  async deleteArticleController(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Article ID is required",
+          code: "MISSING_ARTICLE_ID",
+        };
+      }
+      const response = await this._articleService.deleteArticleService(id);
+
+      res.status(HttpStatusCode.OK).json({
+        message: MESSAGES.user.articleDeleted,
+      });
+    } catch (error: any) {
+      console.error("Error in deleteArticleController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
+    }
+  }
+
+  async getArticleController(req: Request, res: Response): Promise<void> {
+    try {
+      const { articleId, userId } = req.query;
+
+      if (!articleId || typeof articleId !== "string") {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Article ID is required and must be a string",
+          code: "MISSING_ARTICLE_ID",
+        };
+      }
+
+      // userId is optional, but if provided, it must be a string
+      if (userId && typeof userId !== "string") {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "User ID must be a string",
+          code: "INVALID_USER_ID",
+        };
+      }
+
+      const response = await this._articleService.getArticleService(
+        articleId,
+        userId as string | undefined
+      );
+
+      console.log("Article fetched in controller......////:", response);
+
+      res.status(HttpStatusCode.OK).json({ article: response });
+    } catch (error: any) {
+      console.error("Error in getArticleController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
+    }
+  }
+
+  async likeArticleController(req: Request, res: Response): Promise<void> {
+    try {
+      const { articleId, userId } = req.body;
+
+      if (!articleId || !userId) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Article ID and user ID are required",
+          code: "MISSING_FIELDS",
+        };
+      }
+
+      const response = await this._articleService.likeArticleService(
+        articleId,
+        userId
+      );
+
+      res.status(HttpStatusCode.OK).json({
+        message: MESSAGES.user.likeSuccess,
+        liked: response.liked,
+        likesCount: response.likesCount,
+        dislikesCount: response.dislikesCount,
+      });
+    } catch (error: any) {
+      console.error("Error in likeArticleController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
+    }
+  }
+
+  async dislikeArticleController(req: Request, res: Response): Promise<void> {
+    try {
+      const { articleId, userId } = req.body;
+
+      if (!articleId || !userId) {
+        throw {
+          status: HttpStatusCode.BAD_REQUEST,
+          message: "Article ID and user ID are required",
+          code: "MISSING_FIELDS",
+        };
+      }
+
+      const response = await this._articleService.dislikeArticleService(
+        articleId,
+        userId
+      );
+
+      res.status(HttpStatusCode.OK).json({
+        message: MESSAGES.user.dislikeSuccess,
+        disliked: response.disliked,
+        likesCount: response.likesCount,
+        dislikesCount: response.dislikesCount,
+      });
+    } catch (error: any) {
+      console.error("Error in dislikeArticleController:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
+    }
   }
 }
-
-
-
-export const getArticleController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { articleId, userId } = req.query;
-
-    if (!articleId || typeof articleId !== 'string') {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Article ID is required and must be a string',
-        code: 'MISSING_ARTICLE_ID',
-      };
-    }
-
-    // userId is optional, but if provided, it must be a string
-    if (userId && typeof userId !== 'string') {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'User ID must be a string',
-        code: 'INVALID_USER_ID',
-      };
-    }
-
-    const response = await getArticleService(articleId, userId as string | undefined);
-
-    console.log('Article fetched in controller......////:', response);
-
-    res.status(HttpStatusCode.OK).json({article:response});
-  } catch (error: any) {
-    console.error('Error in getArticleController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
-  }
-};
-
-export const likeArticleController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { articleId, userId } = req.body;
-
-    if (!articleId || !userId) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Article ID and user ID are required',
-        code: 'MISSING_FIELDS',
-      };
-    }
-
-    const response = await likeArticleService(articleId, userId);
-
-    res.status(HttpStatusCode.OK).json({
-      message: MESSAGES.user.likeSuccess,
-      liked: response.liked,
-      likesCount: response.likesCount,
-      dislikesCount: response.dislikesCount,
-    });
-  } catch (error: any) {
-    console.error('Error in likeArticleController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
-  }
-};
-
-export const dislikeArticleController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { articleId, userId } = req.body;
-
-    if (!articleId || !userId) {
-      throw {
-        status: HttpStatusCode.BAD_REQUEST,
-        message: 'Article ID and user ID are required',
-        code: 'MISSING_FIELDS',
-      };
-    }
-
-    const response = await dislikeArticleService(articleId, userId);
-
-    res.status(HttpStatusCode.OK).json({
-      message: MESSAGES.user.dislikeSuccess,
-      disliked: response.disliked,
-      likesCount: response.likesCount,
-      dislikesCount: response.dislikesCount,
-    });
-  } catch (error: any) {
-    console.error('Error in dislikeArticleController:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
-  }
-};

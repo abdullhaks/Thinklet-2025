@@ -1,4 +1,3 @@
-import { inject, injectable } from "inversify";
 import { ArticleResponseDTO, IArticleData } from "../../../dto/articleDto";
 import { IPreference } from "../../../dto/userDto";
 

@@ -25,6 +25,15 @@ export default class BaseRepository<T extends Document>
     }
   }
 
+  async countDocument (filter: FilterQuery<T> = {}): Promise<number> {
+    try {
+      return await this._model.countDocuments(filter).exec();
+    } catch (error) {
+      console.error("Error counting documents:", error);
+      return 0;
+    }
+  }
+
   async findAll(
     filter: FilterQuery<T> = {},
     options: {
