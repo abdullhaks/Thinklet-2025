@@ -60,7 +60,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
         }
   
         try {
-          const response = await getArticle(articleId, user?._id);
+          const response = await getArticle(articleId, user?._id); 
           console.log('Article from frontend:', response);
           setArticleForEdit(response.article);
         } catch (error: any) {
