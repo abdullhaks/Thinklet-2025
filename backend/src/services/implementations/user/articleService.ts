@@ -257,11 +257,18 @@ export default class ArticleService implements IArticleService {
         { sort: { createdAt: -1 }, limit: limit, skip: skip }
       );
 
+
+      console.log("articles are.............................",articles)
+
       const formattedArticles = await Promise.all(
         articles.map(async (article) => {
           return await this.getArticleResponse(article._id.toString(), userId);
         })
       );
+
+
+      console.log("formattedArticles are.............................",formattedArticles)
+
 
       return { articles: formattedArticles };
     } catch (error: any) {

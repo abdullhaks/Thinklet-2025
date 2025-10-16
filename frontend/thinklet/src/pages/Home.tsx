@@ -35,6 +35,8 @@ export const Home = () => {
       try {
         console.log('Fetching articles with preferences:', user.preferences);
         const response = await getPreferenceArticles(user.preferences, limit, articleSet, user._id);
+
+
         console.log('API Response:', response);
         if (response.articles.length === 0) {
           setHasMore(false);
