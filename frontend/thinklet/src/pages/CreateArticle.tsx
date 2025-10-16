@@ -56,7 +56,6 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   useEffect(() => {
       const fetchArticle = async () => {
         if (!articleId || editMode!=true) {
-          message.error('Article ID is missing');
           return;
         }
   

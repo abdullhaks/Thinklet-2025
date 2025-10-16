@@ -6,5 +6,6 @@ export default interface IBaseRepository<T extends Document> {
   create(data: Partial<T>): Promise<T>;
   update(id: string, data: UpdateQuery<T>): Promise<T | null>;
   delete(id: string): Promise<T | null>;
+  countDocument (filter: FilterQuery<T>): Promise<number>;
 }
 

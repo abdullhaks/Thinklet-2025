@@ -1,9 +1,9 @@
 import BaseRepository from "../implementations/baseRepository";
-import { IUserDocument } from "../../entities/userEntity";
+import { IInteractionDocument } from "../../entities/interactionEntity";
 
 
 
-export default interface IInteractionRepository extends BaseRepository<IUserDocument> {
+export default interface IInteractionRepository extends BaseRepository<IInteractionDocument> {
   
 
 
