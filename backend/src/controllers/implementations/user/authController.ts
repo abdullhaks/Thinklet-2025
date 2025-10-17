@@ -1,9 +1,25 @@
 import { Request, Response } from 'express';
-import { loginUser, signupUser,getAccessToken } from '../../../services/implementations/user/authService';
 import { HttpStatusCode } from '../../../utils/enum';
 import { MESSAGES } from '../../../utils/messages';
+import { inject, injectable } from 'inversify';
+import IAuthController from '../../interfaces/user/IAuthController';
+import IAuthService from '../../../services/interfaces/user/IAuthService';
 
-export const signup = async (req: Request, res: Response): Promise<void> => {
+
+
+@injectable()
+export default class AuthController implements IAuthController {
+
+constructor(
+  @inject("IAuthService") private _authService : IAuthService
+){}
+
+
+
+
+
+
+async signup(req: Request, res: Response): Promise<void> {
   try {
     const { firstName, lastName, email, password, confirmPassword, phone, preferences } = req.body;
 
@@ -11,7 +27,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     console.log("user details is ", userDetails);
 
-    const response = await signupUser(userDetails);
+    
+    const response = await this._authService.signupUser(userDetails);
 
     console.log("user is ", response.user);
     res.cookie("thinklet_refreshToken", response.refreshToken, {
@@ -39,7 +56,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+async login(req: Request, res: Response): Promise<void>  {
   try {
     const { emailOrPhone, password } = req.body;
 
@@ -51,7 +68,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const result = await loginUser({ emailOrPhone, password });
+    const result = await this._authService.loginUser({ emailOrPhone, password });
 
     res.cookie('thinklet_refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -78,7 +95,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export const logout =   async (req: Request, res: Response): Promise<void> =>{
+async logout(req: Request, res: Response): Promise<void> {
     try {
       console.log("log out ............ ctrl....");
       res.clearCookie("thinklet_refreshToken", {
@@ -106,7 +123,7 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
 
 
 
-  export const accessToken =  async (req: Request, res: Response): Promise<void> => {
+ async accessToken(req: Request, res: Response): Promise<void>  {
     try {
       const { thinklet_refreshToken } = req.cookies;
 
@@ -117,7 +134,7 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
         return;
       }
 
-      const result = await getAccessToken(thinklet_refreshToken);
+      const result = await this._authService.getAccessToken(thinklet_refreshToken);
 
       console.log("result from ctrl is ...", result);
 
@@ -147,3 +164,9 @@ export const logout =   async (req: Request, res: Response): Promise<void> =>{
         .json({ message: MESSAGES.server.serverError });
     }
   }
+
+
+
+
+
+}
