@@ -23,6 +23,10 @@ userRouter.post('/articleCreate',verifyAccessTokenMidleware("user"),upload.field
     { name: "thumbnail", maxCount: 1 },
   ]),(req,res)=>articleController.createArticle(req,res));
 
+userRouter.put("/articleUpdate",verifyAccessTokenMidleware("user"),upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+  ]),(req,res)=>articleController.updateArticleController(req,res));
+  
 userRouter.put('/updateProfileImage',verifyAccessTokenMidleware("user"),upload.fields([
     { name: "profile", maxCount: 1 },
   ]),(req,res)=>profileController.updateProfileImageController(req,res)); 

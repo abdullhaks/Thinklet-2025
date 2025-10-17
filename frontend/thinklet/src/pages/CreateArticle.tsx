@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Camera, X } from 'lucide-react';
+import { ArrowLeft, Camera, X, Trash2 } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import { message } from 'antd';
 import { z } from 'zod';
-import { createArticle, getArticle, getCategories } from '../services/apis/userApi';
+import { createArticle, getArticle, getCategories, updateArticle } from '../services/apis/userApi';
 import { useSelector } from 'react-redux';
 import type { IUser } from '../interfaces/user';
 import type { ArticleResponseDTO } from '../interfaces/article';
@@ -31,7 +31,7 @@ const articleSchema = z.object({
     .max(2000, "Description must be at most 2000 characters"),
   category: z.string().min(1, "Category is required"),
   tags: z.array(z.string()).optional(),
-  thumbnail: z.instanceof(File).optional().nullable(),
+  thumbnail: z.union([z.instanceof(File), z.string()]).nullable().optional(),
 });
 
 type ArticleData = z.infer<typeof articleSchema>;
@@ -51,74 +51,22 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
-  const [articleForEdit,setArticleForEdit] = useState<ArticleResponseDTO | null>(null)
-
-  useEffect(() => {
-      const fetchArticle = async () => {
-        if (!articleId || editMode!=true) {
-          return;
-        }
-  
-        try {
-          const response = await getArticle(articleId, user?._id); 
-          console.log('Article from frontend:', response);
-          setArticleForEdit(response.article);
-        } catch (error: any) {
-          message.error(error.message || 'Failed to fetch article');
-        }
-      };
-  
-      fetchArticle();
-    }, [articleId, user?._id]);
-
-
-  const [formData, setFormData] = useState<Partial<ArticleData>>(editMode && articleForEdit ? 
-    {
-      title: articleForEdit.title,
-      description: articleForEdit.description,
-      category: articleForEdit.category.name || '',
-      tags: articleForEdit.tags,
-      // thumbnail: articleForEdit.thumbnail?articleForEdit.thumbnail:null ,
-      author: articleForEdit.author._id,
-    } : {
-      title: '',
-      description: '',
-      category: '',
-      tags: [],
-      thumbnail: null,
-      author: user?._id || '',
-    });
+  const [articleForEdit, setArticleForEdit] = useState<ArticleResponseDTO | null>(null);
+  const [originalThumbnail, setOriginalThumbnail] = useState<string>('');
+  const [formData, setFormData] = useState<Partial<ArticleData>>({
+    title: '',
+    description: '',
+    category: '',
+    tags: [],
+    thumbnail: null,
+    author: user?._id || '',
+  });
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(undefined);
   const [errors, setErrors] = useState<Partial<Record<keyof ArticleData, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof ArticleData, boolean>>>({});
   const [thumbnailError, setThumbnailError] = useState<string>('');
   const [categories, setCategories] = useState<Category[]>([]);
-
-
-  useEffect(() => {
-  if (editMode && articleId) {
-    const fetchArticle = async () => {
-      try {
-        // const response = await getArticle(articleId); // Implement this API
-        // setFormData({
-        //   title: response.title,
-        //   description: response.description,
-        //   category: response.category._id,
-        //   tags: response.tags || [],
-        //   thumbnail: null,
-        //   author: user._id,
-        // });
-        // if (response.thumbnail) {
-        //   setThumbnailPreview(response.thumbnail);
-        // }
-      } catch (error) {
-        message.error('Failed to load article');
-      }
-    };
-    fetchArticle();
-  }
-}, [editMode, articleId, user._id]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -135,6 +83,36 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
 
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      if (editMode && articleId) {
+        try {
+          const response = await getArticle(articleId, user?._id);
+          console.log('Article from frontend:', response);
+          const article = response.article;
+          setArticleForEdit(article);
+          console.log(articleForEdit?.title);
+          setFormData({
+            title: article.title,
+            description: article.description,
+            category: article.category._id,
+            tags: article.tags || [],
+            thumbnail: null,  // null means no change
+            author: article.author._id,
+          });
+          if (article.thumbnail) {
+            setThumbnailPreview(article.thumbnail);
+            setOriginalThumbnail(article.thumbnail);
+          }
+        } catch (error: any) {
+          message.error(error.message || 'Failed to fetch article');
+        }
+      }
+    };
+
+    fetchArticle();
+  }, [editMode, articleId, user?._id]);
 
   useEffect(() => {
     const result = articleSchema.safeParse(formData);
@@ -155,8 +133,64 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
+  const handleTagsChange = (value: string) => {
+    const tags = value.split(',').map((tag) => tag.trim()).filter((tag) => tag);
+    handleInputChange('tags', tags);
+  };
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        setThumbnailError('Please select a valid image file');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setThumbnailError('File size must be less than 5MB');
+        return;
+      }
+
+      // Revoke previous blob URL if exists
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(thumbnailPreview);
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      setThumbnailFile(file);
+      setThumbnailPreview(previewUrl);
+      setFormData((prev) => ({ ...prev, thumbnail: file }));
+      setThumbnailError('');
+      setTouched((prev) => ({ ...prev, thumbnail: true }));
+    },
+    [thumbnailPreview]
+  );
+
+  const cancelImage = useCallback(() => {
+    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setThumbnailFile(null);
+    setThumbnailPreview(originalThumbnail || undefined);
+    setFormData((prev) => ({ ...prev, thumbnail: null }));  // null means no change
+    setThumbnailError('');
+    setTouched((prev) => ({ ...prev, thumbnail: true }));
+  }, [thumbnailPreview, originalThumbnail]);
+
+  const removeImage = useCallback(() => {
+    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(thumbnailPreview);
+    }
+    setThumbnailFile(null);
+    setThumbnailPreview(undefined);
+    setFormData((prev) => ({ ...prev, thumbnail: '' }));  // '' means remove
+    setThumbnailError('');
+    setTouched((prev) => ({ ...prev, thumbnail: true }));
+  }, [thumbnailPreview]);
+
   const handleSubmit = async () => {
-    // Ensure user is authenticated
     if (!user?._id) {
       message.error('Please log in to create an article');
       navigate('/login');
@@ -201,8 +235,13 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
       if (value !== null && value !== undefined) {
         if (key === 'tags' && Array.isArray(value)) {
           formDataToSend.append(key, value.join(','));
-        } else if (key === 'thumbnail' && thumbnailFile) {
-          formDataToSend.append(key, thumbnailFile);
+        } else if (key === 'thumbnail') {
+          if (value instanceof File) {
+            formDataToSend.append(key, value);
+          } else if (typeof value === 'string') {
+            formDataToSend.append(key, value);
+          }
+          // If null, don't append (no change)
         } else if (key === 'author') {
           formDataToSend.append(key, user._id);
         } else {
@@ -211,11 +250,17 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
       }
     });
 
+    if (editMode && articleId) {
+      formDataToSend.append('articleId', articleId);
+    }
+
     try {
       if (editMode) {
-        // TODO: Implement updateArticle API call
-        message.success('Article updated successfully!');
-        navigate('/articles');
+        const response = await updateArticle(formDataToSend);
+        if (response) {
+          message.success('Article updated successfully!');
+          navigate('/articles');
+        }
       } else {
         const response = await createArticle(formDataToSend);
         if (response) {
@@ -224,8 +269,8 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
         }
       }
     } catch (error: any) {
-      console.error('Article creation failed:', error);
-      const errorMessage = error.message || 'Failed to create article';
+      console.error('Article operation failed:', error);
+      const errorMessage = error.message || 'Failed to process article';
       const errorCode = error.code || 'SERVER_ERROR';
       switch (errorCode) {
         case 'MISSING_FIELDS':
@@ -237,43 +282,14 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     }
   };
 
-  const handleTagsChange = (value: string) => {
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag);
-    handleInputChange('tags', tags);
-  };
-
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setThumbnailError('Please select a valid image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setThumbnailError('File size must be less than 5MB');
-      return;
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    setThumbnailFile(file);
-    setThumbnailPreview(previewUrl);
-    setFormData({ ...formData, thumbnail: file });
-    setThumbnailError('');
-    setTouched((prev) => ({ ...prev, thumbnail: true }));
-  }, [formData]);
-
-  const cancelImage = useCallback(() => {
-    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
-      URL.revokeObjectURL(thumbnailPreview);
-    }
-    setThumbnailFile(null);
-    setThumbnailPreview(undefined);
-    setFormData({ ...formData, thumbnail: null });
-    setThumbnailError('');
-    setTouched((prev) => ({ ...prev, thumbnail: true }));
-  }, [thumbnailPreview, formData]);
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(thumbnailPreview);
+      }
+    };
+  }, [thumbnailPreview]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
@@ -365,7 +381,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
                       className="w-full h-40 object-cover"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
+                    <div className="absolute inset-0 bg-black/40 bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
                       <div className="flex gap-3">
                         <label
                           htmlFor="thumbnail-upload"
@@ -373,12 +389,19 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
                         >
                           <Camera className="w-5 h-5" /> Change
                         </label>
-                        {thumbnailFile && (
+                        {thumbnailFile ? (
                           <button
                             onClick={cancelImage}
                             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 text-sm"
                           >
                             <X className="w-5 h-5" /> Cancel
+                          </button>
+                        ) : (
+                          <button
+                            onClick={removeImage}
+                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200 text-sm"
+                          >
+                            <Trash2 className="w-5 h-5" /> Remove
                           </button>
                         )}
                       </div>

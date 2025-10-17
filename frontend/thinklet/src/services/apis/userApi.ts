@@ -101,6 +101,21 @@ export const createArticle = async (articleData: FormData) => {
   }
 };
 
+
+export const updateArticle = async (articleData: FormData) => {
+  try {
+    const response = await userInstance.put(ROUTES.user.articleUpdate, articleData);
+    return response.data;
+  } catch (error: any) {
+    console.error("Article updating failed:", error);
+    throw {
+      message: error.response?.data?.message || "Failed to update article",
+      code: error.response?.data?.code || "SERVER_ERROR"
+    };
+  }
+};
+
+
 export const getPreferenceArticles = async (
   preferences: IPreference[],
   limit: number,
