@@ -1,14 +1,25 @@
-import User from '../../../models/user';
-import Category from '../../../models/category';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { userLoginRequestDto, userSignupRequestDto } from '../../../dto/userDto';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../../utils/jwt';
-import { getSignedImageURL } from '../../../helpers/uploadS3';
 import { HttpStatusCode } from '../../../utils/enum';
+import IAuthService from '../../interfaces/user/IAuthService';
+import { inject, injectable } from 'inversify';
+import IUserRepository from '../../../repositories/interfaces/IUserRepository';
+import ICategoryRepository from '../../../repositories/interfaces/IcategoryRepository';
 
 
-export const signupUser = async (userData: userSignupRequestDto): Promise<any> => {
+@injectable()
+export default class AuthService implements IAuthService {
+
+constructor(
+  @inject("IUserRepository") private _userRepository : IUserRepository ,
+  @inject("ICategoryRepository") private _categoryRepository : ICategoryRepository
+){};
+
+
+
+
+async signupUser(userData: userSignupRequestDto): Promise<any> {
   console.log("user data from service....", userData);
 
   if (!userData.email || !userData.password || !userData.confirmPassword || !userData.firstName || !userData.lastName || !userData.phone || !userData.preferences.length) {
@@ -27,7 +38,8 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
     };
   }
 
-  const existingUser = await User.findOne({ email: userData.email });
+
+  const existingUser = await this._userRepository.findOne({ email: userData.email });
   console.log("Existing user: ", existingUser);
   if (existingUser) {
     throw {
@@ -40,7 +52,8 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
   const salt = await bcrypt.genSalt(10);
   userData.password = await bcrypt.hash(userData.password, salt);
 
-  const response = await User.create(userData);
+  
+  const response = await this._userRepository.create(userData);
 
   const {password,...rest} = response;
 
@@ -56,7 +69,8 @@ export const signupUser = async (userData: userSignupRequestDto): Promise<any> =
 
 let preferences = await Promise.all(
     rest.preferences.map(async (prefId) => {
-      let prefData = await Category.findOne({ _id: prefId });
+      
+      let prefData = await this._categoryRepository.findOne({ _id: prefId });
       return { _id: prefData?._id, name: prefData?.name };
     })
   );
@@ -82,8 +96,7 @@ let preferences = await Promise.all(
 };
 
 
-
-export const loginUser = async (userData: userLoginRequestDto): Promise<any> => {
+async loginUser(userData: userLoginRequestDto): Promise<any> {
   console.log('user data from service....', userData);
 
   if (!userData.emailOrPhone || !userData.password) {
@@ -94,9 +107,10 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
     };
   }
 
-  let existingUser = await User.findOne({ email: userData.emailOrPhone });
+  let existingUser = await this._userRepository.findOne({ email: userData.emailOrPhone });
   if (!existingUser) {
-    existingUser = await User.findOne({ phone: userData.emailOrPhone });
+    
+    existingUser = await this._userRepository.findOne({ phone: userData.emailOrPhone });
     if (!existingUser) {
       throw {
         status: HttpStatusCode.BAD_REQUEST,
@@ -128,8 +142,8 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
   const { password, ...rest } = existingUser.toJSON();
 
   let preferences = await Promise.all(
-    rest.preferences.map(async (prefId) => {
-      let prefData = await Category.findOne({ _id: prefId });
+    rest.preferences.map(async (prefId:string) => {
+      let prefData = await this._categoryRepository.findOne({ _id: prefId });
       return { _id: prefData?._id, name: prefData?.name };
     })
   );
@@ -153,7 +167,7 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
 };
 
 
-  export const getAccessToken = async (refreshToken: string): Promise<any> => {
+async getAccessToken(refreshToken: string): Promise<any> {
     // console.log("Refresh token from service: ", refreshToken);
     if (!refreshToken) {
       throw new Error("refresh token not found");
@@ -176,4 +190,15 @@ export const loginUser = async (userData: userLoginRequestDto): Promise<any> => 
     // console.log("new access token is ...............",accessToken);
 
     return { accessToken };
-  }
+  };
+
+
+
+
+
+
+
+
+
+
+}
