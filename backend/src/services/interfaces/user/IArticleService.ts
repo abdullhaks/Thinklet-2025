@@ -1,4 +1,4 @@
-import { ArticleResponseDTO, IArticleData } from "../../../dto/articleDto";
+import { ArticleResponseDTO, articleUpdateRequestDTO, IArticleData } from "../../../dto/articleDto";
 import { IPreference } from "../../../dto/userDto";
 
 interface IThumbnail {
@@ -15,6 +15,8 @@ articleCreate(
   articleData: Partial<IArticleData>,
   thumbnail?: IThumbnail
 ): Promise<{ message: string; article: ArticleResponseDTO }>;
+
+updateArticleService(articleData: articleUpdateRequestDTO): Promise<{article: ArticleResponseDTO }>;
 
 getPreferenceArticlesService(
   preferences: IPreference[],

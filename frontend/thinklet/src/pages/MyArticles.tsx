@@ -122,7 +122,7 @@ export const ArticleList = () => {
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => /*navigate(`/edit/${article._id}`)*/ message.warning("its not available now. please try later")}
+                    onClick={() => navigate(`/edit/${article._id}`)}
                     className="flex-1 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center space-x-2 text-sm font-semibold"
                   >
                     <Edit className="w-4 h-4" />

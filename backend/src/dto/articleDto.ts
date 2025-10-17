@@ -49,4 +49,21 @@ export  interface IArticleData {
   author: string;
   createdAt: Date;
   updatedAt: Date;
+};
+
+interface IThumbnail {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+}
+
+export interface articleUpdateRequestDTO {
+
+  _id: string 
+  title: string;
+  description: string;
+  thumbnail?: string | { buffer: Buffer; originalname: string; mimetype: string; } | undefined ;
+  tags?: string[];
+  category: string;
+  author: string;
 }

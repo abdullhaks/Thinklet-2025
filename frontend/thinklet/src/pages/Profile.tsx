@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Camera, Copy, Save } from 'lucide-react';
+import { ArrowLeft, Camera, Copy, Eye, Save } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
 import type { RootState } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,6 +9,7 @@ import { updateUser } from "../redux/slices/userSlice";
 import { z } from 'zod';
 import { message } from 'antd';
 import EditProfileModal from "../components/EditProfileModal";
+import PasswordChange from "../components/PasswordChange";
 
 // Define Zod schema for validation
 const profileSchema = z.object({
@@ -38,7 +39,8 @@ export const Profile = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
+  const [isPasswordModalOpen,setPasswordModalOpen] = useState(false);
+ 
   useEffect(() => {
     const fetchingCategories = async () => {
       const response = await getCategories();
@@ -138,6 +140,9 @@ export const Profile = () => {
     }
   };
 
+
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -235,14 +240,23 @@ export const Profile = () => {
                 </div>
               )}
 
-              <div className="mt-4 sm:mt-0 sm:ml-auto">
+              <div className="mt-4 sm:mt-0 sm:ml-auto ">
                 <button
                   onClick={() => setIsEditProfileModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+                  className="flex items-center gap-2 px-4 py-2 mb-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
                 >
                   <Save size={16} />
                   <span>Edit Profile</span>
                 </button>
+
+                <button
+                  onClick={()=>setPasswordModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+                >
+                  <Eye size={16} />
+                  <span>Change Password</span>
+                </button>
+
               </div>
             </div>
           </div>
@@ -296,6 +310,16 @@ export const Profile = () => {
           availablePreferences={availablePreferences}
         />
       </div>
+
+
+    {isPasswordModalOpen && 
+
+    <PasswordChange setPasswordModalOpen={setPasswordModalOpen}/>
+
+    }
+
+
+
     </div>
   );
 };
