@@ -5,11 +5,13 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 
-import { persistor,store } from "../redux/store/store";
-import { logoutUser } from "../redux/slices/userSlice"; 
+import { persistor, store } from "../redux/store/store";
+import { logoutUser } from "../redux/slices/userSlice";
 
-import {accessToken as userAccessToken, logoutUser as userLogout,} from "../services/apis/userApi";
-
+import {
+  accessToken as userAccessToken,
+  logoutUser as userLogout,
+} from "../services/apis/userApi";
 
 import { HttpStatusCode } from "./enum";
 import { message } from "antd";
@@ -30,11 +32,9 @@ declare module "axios" {
 
 const apiUrl = import.meta.env.VITE_API_URL as string;
 
+//Helper to determine role from URL pathsdf
 
- //Helper to determine role from URL pathsdf
-
-const getRoleFromURL = (url?: string): "user" |"admin" | null => {
-  
+const getRoleFromURL = (url?: string): "user" | "admin" | null => {
   if (!url) return null;
   if (url.includes("api/user")) return "user";
   // if (url.includes("api/admin")) return "admin";
@@ -45,7 +45,6 @@ const getRoleFromURL = (url?: string): "user" |"admin" | null => {
  * Logout logic for each role
  */
 const handleLogout = async (role: string, error: AxiosError<ErrorResponse>) => {
-
   console.log(`Handling logout for ${role} due to error:`, error);
 
   switch (role) {
@@ -56,7 +55,7 @@ const handleLogout = async (role: string, error: AxiosError<ErrorResponse>) => {
       window.location.href = "/";
 
       break;
-   
+
     // case "admin":
     //   store.dispatch(logoutAdmin());
     //   await adminLogout();
@@ -84,7 +83,7 @@ const handleTokenRefresh = async (
       case "user":
         response = await userAccessToken();
         break;
-   
+
       // case "admin":
       //   response = await adminRefreshToken();
       //   break;
@@ -98,22 +97,23 @@ const handleTokenRefresh = async (
   }
 };
 
+//Factory for role-based axios instances
 
-  //Factory for role-based axios instances
- 
 const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
     baseURL: apiUrl,
     withCredentials: true,
   });
 
-  instance.interceptors.response.use( 
+  instance.interceptors.response.use(
     (response: AxiosResponse) => response,
     async (error: AxiosError<ErrorResponse>) => {
       const originalRequest = error.config as InternalAxiosRequestConfig;
 
-      console.log("original request is ",originalRequest);
-      const role = getRoleFromURL(`${originalRequest?.baseURL}${originalRequest?.url}`);
+      console.log("original request is ", originalRequest);
+      const role = getRoleFromURL(
+        `${originalRequest?.baseURL}${originalRequest?.url}`
+      );
       if (!role) return Promise.reject(error);
 
       if (
@@ -124,12 +124,10 @@ const createAxiosInstance = (): AxiosInstance => {
         console.log(`401 for ${role}. Attempting token refresh...`);
         return handleTokenRefresh(originalRequest, role);
       } else if (originalRequest.isRetry) {
-
         console.log(`retry.....Logging out...`);
         await handleLogout(role, error);
-        return
+        return;
       } else if (error.response?.status === HttpStatusCode.FORBIDDEN) {
-
         console.log(`403 for ${role}. Logging out...`);
         await handleLogout(role, error);
       }
@@ -139,9 +137,7 @@ const createAxiosInstance = (): AxiosInstance => {
   );
 
   return instance;
-  
 };
-
 
 export const userInstance = createAxiosInstance();
 // export const adminInstance = createAxiosInstance();

@@ -1,14 +1,19 @@
-import { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Camera, X, Trash2 } from 'lucide-react';
-import { Navbar } from '../components/Navbar';
-import { message } from 'antd';
-import { z } from 'zod';
-import { createArticle, getArticle, getCategories, updateArticle } from '../services/apis/userApi';
-import { useSelector } from 'react-redux';
-import type { IUser } from '../interfaces/user';
-import type { ArticleResponseDTO } from '../interfaces/article';
+import { useState, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Camera, X, Trash2 } from "lucide-react";
+import { Navbar } from "../components/Navbar";
+import { message } from "antd";
+import { z } from "zod";
+import {
+  createArticle,
+  getArticle,
+  getCategories,
+  updateArticle,
+} from "../services/apis/userApi";
+import { useSelector } from "react-redux";
+import type { IUser } from "../interfaces/user";
+import type { ArticleResponseDTO } from "../interfaces/article";
 
 interface CreateArticleProps {
   editMode?: boolean;
@@ -31,7 +36,10 @@ const articleSchema = z.object({
     .max(2000, "Description must be at most 2000 characters"),
   category: z.string().min(1, "Category is required"),
   tags: z.array(z.string()).optional(),
-  thumbnail: z.union([z.instanceof(File), z.string()]).nullable().optional(),
+  thumbnail: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 type ArticleData = z.infer<typeof articleSchema>;
@@ -51,21 +59,28 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
-  const [articleForEdit, setArticleForEdit] = useState<ArticleResponseDTO | null>(null);
-  const [originalThumbnail, setOriginalThumbnail] = useState<string>('');
+  const [articleForEdit, setArticleForEdit] =
+    useState<ArticleResponseDTO | null>(null);
+  const [originalThumbnail, setOriginalThumbnail] = useState<string>("");
   const [formData, setFormData] = useState<Partial<ArticleData>>({
-    title: '',
-    description: '',
-    category: '',
+    title: "",
+    description: "",
+    category: "",
     tags: [],
     thumbnail: null,
-    author: user?._id || '',
+    author: user?._id || "",
   });
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(undefined);
-  const [errors, setErrors] = useState<Partial<Record<keyof ArticleData, string>>>({});
-  const [touched, setTouched] = useState<Partial<Record<keyof ArticleData, boolean>>>({});
-  const [thumbnailError, setThumbnailError] = useState<string>('');
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(
+    undefined
+  );
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ArticleData, string>>
+  >({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof ArticleData, boolean>>
+  >({});
+  const [thumbnailError, setThumbnailError] = useState<string>("");
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -76,8 +91,8 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
           setCategories(response.categories);
         }
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
-        message.error('Failed to load categories');
+        console.error("Failed to fetch categories:", error);
+        message.error("Failed to load categories");
       }
     };
 
@@ -89,7 +104,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
       if (editMode && articleId) {
         try {
           const response = await getArticle(articleId, user?._id);
-          console.log('Article from frontend:', response);
+          console.log("Article from frontend:", response);
           const article = response.article;
           setArticleForEdit(article);
           console.log(articleForEdit?.title);
@@ -98,7 +113,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             description: article.description,
             category: article.category._id,
             tags: article.tags || [],
-            thumbnail: null,  // null means no change
+            thumbnail: null, // null means no change
             author: article.author._id,
           });
           if (article.thumbnail) {
@@ -106,7 +121,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             setOriginalThumbnail(article.thumbnail);
           }
         } catch (error: any) {
-          message.error(error.message || 'Failed to fetch article');
+          message.error(error.message || "Failed to fetch article");
         }
       }
     };
@@ -128,14 +143,20 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     }
   }, [formData]);
 
-  const handleInputChange = (field: keyof ArticleData, value: string | string[]) => {
+  const handleInputChange = (
+    field: keyof ArticleData,
+    value: string | string[]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const handleTagsChange = (value: string) => {
-    const tags = value.split(',').map((tag) => tag.trim()).filter((tag) => tag);
-    handleInputChange('tags', tags);
+    const tags = value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+    handleInputChange("tags", tags);
   };
 
   const handleFileChange = useCallback(
@@ -143,18 +164,18 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      if (!file.type.startsWith('image/')) {
-        setThumbnailError('Please select a valid image file');
+      if (!file.type.startsWith("image/")) {
+        setThumbnailError("Please select a valid image file");
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setThumbnailError('File size must be less than 5MB');
+        setThumbnailError("File size must be less than 5MB");
         return;
       }
 
       // Revoke previous blob URL if exists
-      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      if (thumbnailPreview && thumbnailPreview.startsWith("blob:")) {
         URL.revokeObjectURL(thumbnailPreview);
       }
 
@@ -162,38 +183,38 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
       setThumbnailFile(file);
       setThumbnailPreview(previewUrl);
       setFormData((prev) => ({ ...prev, thumbnail: file }));
-      setThumbnailError('');
+      setThumbnailError("");
       setTouched((prev) => ({ ...prev, thumbnail: true }));
     },
     [thumbnailPreview]
   );
 
   const cancelImage = useCallback(() => {
-    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+    if (thumbnailPreview && thumbnailPreview.startsWith("blob:")) {
       URL.revokeObjectURL(thumbnailPreview);
     }
     setThumbnailFile(null);
     setThumbnailPreview(originalThumbnail || undefined);
-    setFormData((prev) => ({ ...prev, thumbnail: null }));  // null means no change
-    setThumbnailError('');
+    setFormData((prev) => ({ ...prev, thumbnail: null })); // null means no change
+    setThumbnailError("");
     setTouched((prev) => ({ ...prev, thumbnail: true }));
   }, [thumbnailPreview, originalThumbnail]);
 
   const removeImage = useCallback(() => {
-    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+    if (thumbnailPreview && thumbnailPreview.startsWith("blob:")) {
       URL.revokeObjectURL(thumbnailPreview);
     }
     setThumbnailFile(null);
     setThumbnailPreview(undefined);
-    setFormData((prev) => ({ ...prev, thumbnail: '' }));  // '' means remove
-    setThumbnailError('');
+    setFormData((prev) => ({ ...prev, thumbnail: "" })); // '' means remove
+    setThumbnailError("");
     setTouched((prev) => ({ ...prev, thumbnail: true }));
   }, [thumbnailPreview]);
 
   const handleSubmit = async () => {
     if (!user?._id) {
-      message.error('Please log in to create an article');
-      navigate('/login');
+      message.error("Please log in to create an article");
+      navigate("/login");
       return;
     }
 
@@ -213,19 +234,19 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
         thumbnail: true,
         author: true,
       });
-      message.error('Please fix the errors before submitting!');
+      message.error("Please fix the errors before submitting!");
       return;
     }
 
     if (thumbnailFile) {
       if (thumbnailFile.size > 5 * 1024 * 1024) {
-        setThumbnailError('Thumbnail file size exceeds 5MB');
-        message.error('Please fix the thumbnail error!');
+        setThumbnailError("Thumbnail file size exceeds 5MB");
+        message.error("Please fix the thumbnail error!");
         return;
       }
-      if (!thumbnailFile.type.startsWith('image/')) {
-        setThumbnailError('Thumbnail must be an image file');
-        message.error('Please fix the thumbnail error!');
+      if (!thumbnailFile.type.startsWith("image/")) {
+        setThumbnailError("Thumbnail must be an image file");
+        message.error("Please fix the thumbnail error!");
         return;
       }
     }
@@ -233,16 +254,16 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
-        if (key === 'tags' && Array.isArray(value)) {
-          formDataToSend.append(key, value.join(','));
-        } else if (key === 'thumbnail') {
+        if (key === "tags" && Array.isArray(value)) {
+          formDataToSend.append(key, value.join(","));
+        } else if (key === "thumbnail") {
           if (value instanceof File) {
             formDataToSend.append(key, value);
-          } else if (typeof value === 'string') {
+          } else if (typeof value === "string") {
             formDataToSend.append(key, value);
           }
           // If null, don't append (no change)
-        } else if (key === 'author') {
+        } else if (key === "author") {
           formDataToSend.append(key, user._id);
         } else {
           formDataToSend.append(key, value as string);
@@ -251,30 +272,30 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     });
 
     if (editMode && articleId) {
-      formDataToSend.append('articleId', articleId);
+      formDataToSend.append("articleId", articleId);
     }
 
     try {
       if (editMode) {
         const response = await updateArticle(formDataToSend);
         if (response) {
-          message.success('Article updated successfully!');
-          navigate('/articles');
+          message.success("Article updated successfully!");
+          navigate("/articles");
         }
       } else {
         const response = await createArticle(formDataToSend);
         if (response) {
-          message.success('Article published successfully!');
-          navigate('/articles');
+          message.success("Article published successfully!");
+          navigate("/articles");
         }
       }
     } catch (error: any) {
-      console.error('Article operation failed:', error);
-      const errorMessage = error.message || 'Failed to process article';
-      const errorCode = error.code || 'SERVER_ERROR';
+      console.error("Article operation failed:", error);
+      const errorMessage = error.message || "Failed to process article";
+      const errorCode = error.code || "SERVER_ERROR";
       switch (errorCode) {
-        case 'MISSING_FIELDS':
-          message.error('Please provide all required fields');
+        case "MISSING_FIELDS":
+          message.error("Please provide all required fields");
           break;
         default:
           message.error(errorMessage);
@@ -285,7 +306,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
   // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
-      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      if (thumbnailPreview && thumbnailPreview.startsWith("blob:")) {
         URL.revokeObjectURL(thumbnailPreview);
       }
     };
@@ -309,19 +330,23 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10"
         >
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-            {editMode ? 'Edit Article' : 'Create New Article'}
+            {editMode ? "Edit Article" : "Create New Article"}
           </h1>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title *
+              </label>
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                onChange={(e) => handleInputChange("title", e.target.value)}
                 placeholder="Enter article title..."
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-lg ${
-                  touched.title && errors.title ? 'border-red-500' : 'border-gray-300'
+                  touched.title && errors.title
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               />
               {touched.title && errors.title && (
@@ -333,17 +358,23 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
               <select
                 value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
+                onChange={(e) => handleInputChange("category", e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent ${
-                  touched.category && errors.category ? 'border-red-500' : 'border-gray-300'
+                  touched.category && errors.category
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
                 ))}
               </select>
               {touched.category && errors.category && (
@@ -355,7 +386,9 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Thumbnail
+              </label>
               <div className="relative">
                 <input
                   type="file"
@@ -370,8 +403,12 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
                     className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all duration-200 bg-gray-50"
                   >
                     <Camera className="w-12 h-12 text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-600">Click to upload thumbnail</span>
-                    <span className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</span>
+                    <span className="text-sm text-gray-600">
+                      Click to upload thumbnail
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">
+                      PNG, JPG up to 5MB
+                    </span>
                   </label>
                 ) : (
                   <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
@@ -418,14 +455,20 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description *
+              </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Write your article description here..."
                 rows={12}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent resize-none ${
-                  touched.description && errors.description ? 'border-red-500' : 'border-gray-300'
+                  touched.description && errors.description
+                    ? "border-red-500"
+                    : "border-gray-300"
                 }`}
               />
               {touched.description && errors.description && (
@@ -437,10 +480,12 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tags (comma separated)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags (comma separated)
+              </label>
               <input
                 type="text"
-                value={formData.tags?.join(', ') || ''}
+                value={formData.tags?.join(", ") || ""}
                 onChange={(e) => handleTagsChange(e.target.value)}
                 placeholder="AI, Technology, Innovation"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent"
@@ -452,7 +497,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
                 onClick={handleSubmit}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
               >
-                {editMode ? 'Update Article' : 'Publish Article'}
+                {editMode ? "Update Article" : "Publish Article"}
               </button>
               <button
                 onClick={() => navigate(-1)}

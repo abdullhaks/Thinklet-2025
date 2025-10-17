@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 import { message } from "antd";
 import { GridBackground } from "../components/gridBackground";
 import { FormInput } from "../components/FormInput";
@@ -21,13 +21,13 @@ export const Signup = () => {
     confirmPassword: string;
     preferences: string[];
   }>({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    preferences: []
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    preferences: [],
   });
 
   const [errors, setErrors] = useState({
@@ -37,111 +37,108 @@ export const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    preferences: ""
+    preferences: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [category,setCategories] = useState<any>([]);
+  const [category, setCategories] = useState<any>([]);
 
-  useEffect(()=>{
-
-    let fetchingCategories = async ()=>{
+  useEffect(() => {
+    let fetchingCategories = async () => {
       const response = await getCategories();
-      if(response.categories.length){
-        setCategories(response.categories)
+      if (response.categories.length) {
+        setCategories(response.categories);
       }
     };
 
-    fetchingCategories()
-    
-  },[])
-
+    fetchingCategories();
+  }, []);
 
   const validateField = (name: string, value: any) => {
     const newErrors = { ...errors };
 
     switch (name) {
-      case 'firstName':
+      case "firstName":
         if (!value.trim()) {
-          newErrors.firstName = 'First name is required';
+          newErrors.firstName = "First name is required";
         } else if (value.trim().length < 2) {
-          newErrors.firstName = 'First name must be at least 2 characters';
+          newErrors.firstName = "First name must be at least 2 characters";
         } else if (value.trim().length > 50) {
-          newErrors.firstName = 'First name must be less than 50 characters';
+          newErrors.firstName = "First name must be less than 50 characters";
         } else {
-          newErrors.firstName = '';
+          newErrors.firstName = "";
         }
         break;
-      case 'lastName':
+      case "lastName":
         if (!value.trim()) {
-          newErrors.lastName = 'Last name is required';
+          newErrors.lastName = "Last name is required";
         } else if (value.trim().length < 2) {
-          newErrors.lastName = 'Last name must be at least 2 characters';
+          newErrors.lastName = "Last name must be at least 2 characters";
         } else if (value.trim().length > 50) {
-          newErrors.lastName = 'Last name must be less than 50 characters';
+          newErrors.lastName = "Last name must be less than 50 characters";
         } else {
-          newErrors.lastName = '';
+          newErrors.lastName = "";
         }
         break;
-      case 'phone':
+      case "phone":
         const phoneRegex = /^[0-9]{10}$/;
         if (!value.trim()) {
-          newErrors.phone = 'Phone number is required';
+          newErrors.phone = "Phone number is required";
         } else if (!phoneRegex.test(value.trim())) {
-          newErrors.phone = 'Enter a valid 10-digit phone number';
+          newErrors.phone = "Enter a valid 10-digit phone number";
         } else {
-          newErrors.phone = '';
+          newErrors.phone = "";
         }
         break;
-      case 'email':
+      case "email":
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!value.trim()) {
-          newErrors.email = 'Email is required';
+          newErrors.email = "Email is required";
         } else if (!emailRegex.test(value.trim())) {
-          newErrors.email = 'Enter a valid email';
+          newErrors.email = "Enter a valid email";
         } else if (value.trim().length > 100) {
-          newErrors.email = 'Email must be less than 100 characters';
+          newErrors.email = "Email must be less than 100 characters";
         } else {
-          newErrors.email = '';
+          newErrors.email = "";
         }
         break;
-      case 'password':
+      case "password":
         if (!value) {
-          newErrors.password = 'Password is required';
+          newErrors.password = "Password is required";
         } else if (value.length < 8) {
-          newErrors.password = 'Password must be at least 8 characters';
+          newErrors.password = "Password must be at least 8 characters";
         } else if (value.length > 128) {
-          newErrors.password = 'Password must be less than 128 characters';
+          newErrors.password = "Password must be less than 128 characters";
         } else {
-          newErrors.password = '';
+          newErrors.password = "";
         }
         if (formData.confirmPassword && value !== formData.confirmPassword) {
-          newErrors.confirmPassword = 'Passwords do not match';
+          newErrors.confirmPassword = "Passwords do not match";
         } else if (formData.confirmPassword) {
-          newErrors.confirmPassword = '';
+          newErrors.confirmPassword = "";
         }
         break;
-      case 'confirmPassword':
+      case "confirmPassword":
         if (!value) {
-          newErrors.confirmPassword = 'Confirm password is required';
+          newErrors.confirmPassword = "Confirm password is required";
         } else if (value !== formData.password) {
-          newErrors.confirmPassword = 'Passwords do not match';
+          newErrors.confirmPassword = "Passwords do not match";
         } else {
-          newErrors.confirmPassword = '';
+          newErrors.confirmPassword = "";
         }
         break;
-      case 'preferences':
+      case "preferences":
         if (value.length !== 3) {
-          newErrors.preferences = 'Select exactly 3 preferences';
+          newErrors.preferences = "Select exactly 3 preferences";
         } else {
-          newErrors.preferences = '';
+          newErrors.preferences = "";
         }
         break;
     }
 
     setErrors(newErrors);
-    return Object.values(newErrors).every(error => !error);
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,17 +147,18 @@ export const Signup = () => {
     validateField(name, value);
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const isValid = validateField('firstName', formData.firstName) &&
-                      validateField('lastName', formData.lastName) &&
-                      validateField('phone', formData.phone) &&
-                      validateField('email', formData.email) &&
-                      validateField('password', formData.password) &&
-                      validateField('confirmPassword', formData.confirmPassword) &&
-                      validateField('preferences', formData.preferences);
+      const isValid =
+        validateField("firstName", formData.firstName) &&
+        validateField("lastName", formData.lastName) &&
+        validateField("phone", formData.phone) &&
+        validateField("email", formData.email) &&
+        validateField("password", formData.password) &&
+        validateField("confirmPassword", formData.confirmPassword) &&
+        validateField("preferences", formData.preferences);
 
       if (!isValid) {
         message.error("Please fix the form errors");
@@ -179,10 +177,16 @@ export const Signup = () => {
       const errorCode = error.code || "SERVER_ERROR";
       switch (errorCode) {
         case "USER_EXISTS":
-          setErrors(prev => ({ ...prev, email: "This email is already registered" }));
+          setErrors((prev) => ({
+            ...prev,
+            email: "This email is already registered",
+          }));
           break;
         case "PASSWORD_MISMATCH":
-          setErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+          setErrors((prev) => ({
+            ...prev,
+            confirmPassword: "Passwords do not match",
+          }));
           break;
         case "MISSING_FIELDS":
           message.error("Please provide all required fields");
@@ -191,44 +195,48 @@ export const Signup = () => {
           message.error(error.message || "Failed to sign up");
       }
     }
-   
   };
-
 
   const togglePreference = (pref: string) => {
     let newPreferences: string[];
     if (formData.preferences.includes(pref)) {
-      newPreferences = formData.preferences.filter(p => p !== pref);
+      newPreferences = formData.preferences.filter((p) => p !== pref);
     } else if (formData.preferences.length < 3) {
       newPreferences = [...formData.preferences, pref];
     } else {
       return; // Prevent adding more than 3 preferences
     }
     setFormData({ ...formData, preferences: newPreferences });
-    validateField('preferences', newPreferences);
+    validateField("preferences", newPreferences);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 relative py-8 sm:py-12">
       <GridBackground />
-      
+
       <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10"
         >
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="text-purple-600 hover:text-purple-700 mb-4 sm:mb-6 flex items-center gap-2 text-sm sm:text-base"
           >
             ← Back
           </button>
-          
+
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Create Account</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              Create Account
+            </h2>
             <p className="text-sm sm:text-base text-gray-600">
-              Join <span className="text-md sm:text-base font-bold text-violet-600">Thinklet</span> and start sharing your ideas
+              Join{" "}
+              <span className="text-md sm:text-base font-bold text-violet-600">
+                Thinklet
+              </span>{" "}
+              and start sharing your ideas
             </p>
           </div>
 
@@ -299,7 +307,9 @@ export const Signup = () => {
               placeholder="Re-enter password"
               maxLength={128}
               showPasswordToggle={true}
-              onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+              onTogglePassword={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
             />
 
             <div>
@@ -307,37 +317,56 @@ export const Signup = () => {
                 Select 3 Preferences ({formData.preferences.length}/3)
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {category.map((pref:any) => (
+                {category.map((pref: any) => (
                   <button
                     key={pref._id}
                     type="button"
                     onClick={() => togglePreference(pref._id)}
-                    disabled={formData.preferences.length >= 3 && !formData.preferences.includes(pref._id)}
+                    disabled={
+                      formData.preferences.length >= 3 &&
+                      !formData.preferences.includes(pref._id)
+                    }
                     className={`px-3 sm:px-4 py-2 rounded-lg border-2 transition-all text-sm sm:text-base ${
                       formData.preferences.includes(pref._id)
-                        ? 'border-purple-500 bg-purple-50 text-purple-700'
-                        : 'border-gray-300 hover:border-purple-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? "border-purple-500 bg-purple-50 text-purple-700"
+                        : "border-gray-300 hover:border-purple-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     }`}
                   >
                     {pref.name}
                   </button>
                 ))}
               </div>
-              {errors.preferences && <p className="text-red-500 text-xs mt-1">{errors.preferences}</p>}
+              {errors.preferences && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.preferences}
+                </p>
+              )}
             </div>
 
             <button
               onClick={handleSubmit}
               className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={Object.values(errors).some(error => error) || !formData.firstName || !formData.lastName || !formData.phone || !formData.email || !formData.password || !formData.confirmPassword || formData.preferences.length !== 3}
+              disabled={
+                Object.values(errors).some((error) => error) ||
+                !formData.firstName ||
+                !formData.lastName ||
+                !formData.phone ||
+                !formData.email ||
+                !formData.password ||
+                !formData.confirmPassword ||
+                formData.preferences.length !== 3
+              }
             >
               Sign Up
             </button>
           </div>
 
           <p className="text-center text-sm sm:text-base text-gray-600 mt-6">
-            Already have an account?{' '}
-            <button onClick={() => navigate('/login')} className="text-purple-600 hover:text-purple-700 font-medium">
+            Already have an account?{" "}
+            <button
+              onClick={() => navigate("/login")}
+              className="text-purple-600 hover:text-purple-700 font-medium"
+            >
               Login
             </button>
           </p>

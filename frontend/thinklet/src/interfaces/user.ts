@@ -1,6 +1,6 @@
-export interface IPreference{
-  _id:string;
-  name:string;
+export interface IPreference {
+  _id: string;
+  name: string;
 }
 
 export interface IUser {
@@ -10,7 +10,5 @@ export interface IUser {
   phone?: string;
   email: string;
   profile?: string;
-  preferences: IPreference[]; 
-};
-
-
+  preferences: IPreference[];
+}

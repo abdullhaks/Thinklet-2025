@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { z } from 'zod';
+import { z } from "zod";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -18,11 +18,29 @@ interface EditProfileModalProps {
 }
 
 const profileSchema = z.object({
-  firstName: z.string().trim().min(2, "First name must be at least 2 characters").max(50, "First name must be at most 50 characters"),
-  lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50, "Last name must be at most 50 characters"),
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must be at most 50 characters"),
+  lastName: z
+    .string()
+    .trim()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50, "Last name must be at most 50 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,10}$/, "Invalid phone number format (e.g., +1234567890)").optional().or(z.literal("")),
-  preferences: z.array(z.string()).min(3, "Select at least 3 interests").max(15, "Select at most 5 interests"),
+  phone: z
+    .string()
+    .regex(
+      /^\+?[1-9]\d{1,10}$/,
+      "Invalid phone number format (e.g., +1234567890)"
+    )
+    .optional()
+    .or(z.literal("")),
+  preferences: z
+    .array(z.string())
+    .min(3, "Select at least 3 interests")
+    .max(15, "Select at most 5 interests"),
 });
 
 const EditProfileModal = ({
@@ -50,20 +68,26 @@ const EditProfileModal = ({
     switch (name) {
       case "firstName":
         if (!value.trim()) error = "First name is required";
-        else if (value.trim().length < 2) error = "First name must be at least 2 characters";
-        else if (value.trim().length > 50) error = "First name must be at most 50 characters";
+        else if (value.trim().length < 2)
+          error = "First name must be at least 2 characters";
+        else if (value.trim().length > 50)
+          error = "First name must be at most 50 characters";
         break;
       case "lastName":
         if (!value.trim()) error = "Last name is required";
-        else if (value.trim().length < 2) error = "Last name must be at least 2 characters";
-        else if (value.trim().length > 50) error = "Last name must be at most 50 characters";
+        else if (value.trim().length < 2)
+          error = "Last name must be at least 2 characters";
+        else if (value.trim().length > 50)
+          error = "Last name must be at most 50 characters";
         break;
       case "email":
         if (!value) error = "Email is required";
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Invalid email address";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          error = "Invalid email address";
         break;
       case "phone":
-        if (value && !/^\+?[1-9]\d{1,14}$/.test(value)) error = "Invalid phone number format";
+        if (value && !/^\+?[1-9]\d{1,14}$/.test(value))
+          error = "Invalid phone number format";
         break;
     }
     setErrors((prev) => ({ ...prev, [name]: error ?? "" }));
@@ -79,7 +103,8 @@ const EditProfileModal = ({
       return;
     }
     setFormData({ ...formData, preferences: newPreferences });
-    const error = newPreferences.length < 3 ? "Select at least 3 interests" : undefined;
+    const error =
+      newPreferences.length < 3 ? "Select at least 3 interests" : undefined;
     setErrors((prev) => ({ ...prev, preferences: error ?? "" }));
   };
 
@@ -228,8 +253,8 @@ const EditProfileModal = ({
                     onClick={() => togglePreference(pref._id)}
                     className={`px-4 py-2 rounded-lg border-2 transition-all text-sm ${
                       formData.preferences.includes(pref._id)
-                        ? 'border-purple-500 bg-purple-50 text-purple-700'
-                        : 'border-gray-300 hover:border-purple-300'
+                        ? "border-purple-500 bg-purple-50 text-purple-700"
+                        : "border-gray-300 hover:border-purple-300"
                     }`}
                   >
                     {pref.name}
@@ -237,7 +262,9 @@ const EditProfileModal = ({
                 ))}
               </div>
               {errors.preferences && (
-                <p className="mt-1 text-sm text-red-600">{errors.preferences}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.preferences}
+                </p>
               )}
             </div>
           </div>

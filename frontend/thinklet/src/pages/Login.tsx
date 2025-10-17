@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 import { GridBackground } from "../components/gridBackground";
 import { FormInput } from "../components/FormInput";
 import thinkletLogo from "../assets/thinklet.png";
@@ -10,18 +10,18 @@ import { loginUser as welcome } from "../redux/slices/userSlice";
 import { message } from "antd";
 
 export const Login = () => {
-const navigate = useNavigate();
-const dispatch = useDispatch();
-const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    emailOrPhone: '',
-    password: ''
+    emailOrPhone: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({
     emailOrPhone: "",
-    password: ""
+    password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -30,34 +30,38 @@ const [isLoading, setIsLoading] = useState(false);
     const newErrors = { ...errors };
 
     switch (name) {
-      case 'emailOrPhone':
+      case "emailOrPhone":
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^[0-9]{10}$/;
         if (!value.trim()) {
-          newErrors.emailOrPhone = 'Email or phone number is required';
-        } else if (!emailRegex.test(value.trim()) && !phoneRegex.test(value.trim())) {
-          newErrors.emailOrPhone = 'Enter a valid email or 10-digit phone number';
+          newErrors.emailOrPhone = "Email or phone number is required";
+        } else if (
+          !emailRegex.test(value.trim()) &&
+          !phoneRegex.test(value.trim())
+        ) {
+          newErrors.emailOrPhone =
+            "Enter a valid email or 10-digit phone number";
         } else if (value.trim().length > 100) {
-          newErrors.emailOrPhone = 'Input must be less than 100 characters';
+          newErrors.emailOrPhone = "Input must be less than 100 characters";
         } else {
-          newErrors.emailOrPhone = '';
+          newErrors.emailOrPhone = "";
         }
         break;
-      case 'password':
+      case "password":
         if (!value) {
-          newErrors.password = 'Password is required';
+          newErrors.password = "Password is required";
         } else if (value.length < 8) {
-          newErrors.password = 'Password must be at least 8 characters';
+          newErrors.password = "Password must be at least 8 characters";
         } else if (value.length > 128) {
-          newErrors.password = 'Password must be less than 128 characters';
+          newErrors.password = "Password must be less than 128 characters";
         } else {
-          newErrors.password = '';
+          newErrors.password = "";
         }
         break;
     }
 
     setErrors(newErrors);
-    return Object.values(newErrors).every(error => !error);
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,69 +70,78 @@ const [isLoading, setIsLoading] = useState(false);
     validateField(name, value);
   };
 
-const handleSubmit = async () => {
-  setIsLoading(true);
-  const isEmailOrPhoneValid = validateField('emailOrPhone', formData.emailOrPhone);
-  const isPasswordValid = validateField('password', formData.password);
-  const isValid = isEmailOrPhoneValid && isPasswordValid;
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    const isEmailOrPhoneValid = validateField(
+      "emailOrPhone",
+      formData.emailOrPhone
+    );
+    const isPasswordValid = validateField("password", formData.password);
+    const isValid = isEmailOrPhoneValid && isPasswordValid;
 
-  if (!isValid) {
-    message.error('Please fix the form errors');
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    const response = await loginUser(formData);
-    dispatch(welcome({ user: response.user }));
-    message.success('Logged in successfully');
-    navigate('/user/home');
-  } catch (error: any) {
-    console.error('Login error:', error);
-    const errorMessage = error.message || 'Failed to log in';
-    if (errorMessage.includes('Invalid credentials')) {
-      setErrors(prev => ({
-        ...prev,
-        emailOrPhone: 'Invalid email/phone or password',
-        password: 'Invalid email/phone or password',
-      }));
-    } else if (errorMessage.includes('Please provide all required fields')) {
-      setErrors(prev => ({
-        ...prev,
-        emailOrPhone: !formData.emailOrPhone ? 'Email or phone is required' : '',
-        password: !formData.password ? 'Password is required' : '',
-      }));
-    } else {
-      message.error(errorMessage);
+    if (!isValid) {
+      message.error("Please fix the form errors");
+      setIsLoading(false);
+      return;
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+
+    try {
+      const response = await loginUser(formData);
+      dispatch(welcome({ user: response.user }));
+      message.success("Logged in successfully");
+      navigate("/user/home");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      const errorMessage = error.message || "Failed to log in";
+      if (errorMessage.includes("Invalid credentials")) {
+        setErrors((prev) => ({
+          ...prev,
+          emailOrPhone: "Invalid email/phone or password",
+          password: "Invalid email/phone or password",
+        }));
+      } else if (errorMessage.includes("Please provide all required fields")) {
+        setErrors((prev) => ({
+          ...prev,
+          emailOrPhone: !formData.emailOrPhone
+            ? "Email or phone is required"
+            : "",
+          password: !formData.password ? "Password is required" : "",
+        }));
+      } else {
+        message.error(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 relative flex items-center py-8 sm:py-12">
       <GridBackground />
-      
+
       <div className="relative z-10 max-w-md mx-auto px-4 sm:px-6 w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10"
         >
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="text-purple-600 hover:text-purple-700 mb-4 sm:mb-6 flex items-center gap-2 text-sm sm:text-base"
           >
             ← Back
           </button>
-          
+
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-4">
               <img className="w-48" src={thinkletLogo} alt="Thinklet Logo" />
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-sm sm:text-base text-gray-600">Login to continue your journey</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              Welcome Back
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              Login to continue your journey
+            </p>
           </div>
 
           <div className="space-y-5">
@@ -157,10 +170,16 @@ const handleSubmit = async () => {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center">
-                <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
                 <span className="ml-2 text-gray-600">Remember me</span>
               </label>
-              <button type="button" className="text-purple-600 hover:text-purple-700 font-medium">
+              <button
+                type="button"
+                className="text-purple-600 hover:text-purple-700 font-medium"
+              >
                 Forgot password?
               </button>
             </div>
@@ -168,15 +187,23 @@ const handleSubmit = async () => {
             <button
               onClick={handleSubmit}
               className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || Object.values(errors).some(error => error) || !formData.emailOrPhone || !formData.password}
+              disabled={
+                isLoading ||
+                Object.values(errors).some((error) => error) ||
+                !formData.emailOrPhone ||
+                !formData.password
+              }
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
 
           <p className="text-center text-sm sm:text-base text-gray-600 mt-6">
-            Don't have an account?{' '}
-            <button onClick={() => navigate('/signup')} className="text-purple-600 hover:text-purple-700 font-medium">
+            Don't have an account?{" "}
+            <button
+              onClick={() => navigate("/signup")}
+              className="text-purple-600 hover:text-purple-700 font-medium"
+            >
               Sign Up
             </button>
           </p>

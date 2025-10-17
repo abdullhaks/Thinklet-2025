@@ -23,13 +23,14 @@ const UserRoutes = () => {
         <Route path="/articles" element={<ArticleList />} />
         <Route path="/settings" element={<Profile />} />
         <Route path="/create" element={<CreateArticle />} />
-        <Route path="/edit/:articleId" element={<CreateArticle editMode={true} />} />
-        
+        <Route
+          path="/edit/:articleId"
+          element={<CreateArticle editMode={true} />}
+        />
       </Route>
       <Route path="/article/:articleId" element={<ArticleView />} />
 
       <Route path="*" element={<Navigate to="/" />} />
-
     </Routes>
   );
 };

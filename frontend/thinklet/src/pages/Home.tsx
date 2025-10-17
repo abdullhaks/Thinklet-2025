@@ -1,14 +1,14 @@
 // src/pages/Home.tsx
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { GridBackground } from '../components/gridBackground';
-import { Navbar } from '../components/Navbar';
-import { ArticleCard } from '../components/ArticleCard';
-import { type ArticleResponseDTO } from '../interfaces/article';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../redux/store/store';
-import { getPreferenceArticles } from '../services/apis/userApi';
-import { message } from 'antd';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { GridBackground } from "../components/gridBackground";
+import { Navbar } from "../components/Navbar";
+import { ArticleCard } from "../components/ArticleCard";
+import { type ArticleResponseDTO } from "../interfaces/article";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store/store";
+import { getPreferenceArticles } from "../services/apis/userApi";
+import { message } from "antd";
 
 export const Home = () => {
   const limit = 3;
@@ -21,31 +21,39 @@ export const Home = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       // Log user and preferences for debugging
-      console.log('User:', user);
-      console.log('Preferences:', user?.preferences);
+      console.log("User:", user);
+      console.log("Preferences:", user?.preferences);
 
       if (!user?._id || !user?.preferences || user.preferences.length === 0) {
-        console.log('No user ID or preferences, skipping fetch');
+        console.log("No user ID or preferences, skipping fetch");
         setArticles([]);
         setHasMore(false);
         return;
       }
-      message.loading("fetching articles..")
+      message.loading("fetching articles..");
       setLoading(true);
       try {
-        console.log('Fetching articles with preferences:', user.preferences);
-        const response = await getPreferenceArticles(user.preferences, limit, articleSet, user._id);
+        console.log("Fetching articles with preferences:", user.preferences);
+        const response = await getPreferenceArticles(
+          user.preferences,
+          limit,
+          articleSet,
+          user._id
+        );
 
-
-        console.log('API Response:', response);
+        console.log("API Response:", response);
         if (response.articles.length === 0) {
           setHasMore(false);
         } else {
-          setArticles((prev) => (articleSet === 1 ? response.articles : [...prev, ...response.articles]));
+          setArticles((prev) =>
+            articleSet === 1
+              ? response.articles
+              : [...prev, ...response.articles]
+          );
           setHasMore(response.articles.length === limit);
         }
       } catch (error: any) {
-        console.error('Error fetching preference articles:', error);
+        console.error("Error fetching preference articles:", error);
         setHasMore(false);
       } finally {
         setLoading(false);
@@ -73,13 +81,15 @@ export const Home = () => {
           className="mb-8 sm:mb-12"
         >
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back,{' '}
+            Welcome back,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">
-              {user ? user.firstName : 'User'}
+              {user ? user.firstName : "User"}
             </span>
             !
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">Discover articles based on your interests</p>
+          <p className="text-sm sm:text-base text-gray-600">
+            Discover articles based on your interests
+          </p>
         </motion.div>
 
         {/* Preferences Tags */}
@@ -90,7 +100,9 @@ export const Home = () => {
           className="mb-6 sm:mb-8"
         >
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            <span className="text-xs sm:text-sm text-gray-600 font-medium">Your Interests:</span>
+            <span className="text-xs sm:text-sm text-gray-600 font-medium">
+              Your Interests:
+            </span>
             {user?.preferences?.length && user?.preferences?.length > 0 ? (
               user.preferences.map((pref, index) => (
                 <span
@@ -101,7 +113,9 @@ export const Home = () => {
                 </span>
               ))
             ) : (
-              <span className="text-xs sm:text-sm text-gray-600">No preferences set</span>
+              <span className="text-xs sm:text-sm text-gray-600">
+                No preferences set
+              </span>
             )}
           </div>
         </motion.div>
@@ -109,8 +123,12 @@ export const Home = () => {
         {/* Articles Grid */}
         {articles.length === 0 && !loading ? (
           <div className="text-center py-20">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles available</h3>
-            <p className="text-gray-600">Check back later or adjust your preferences.</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No articles available
+            </h3>
+            <p className="text-gray-600">
+              Check back later or adjust your preferences.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
@@ -139,7 +157,7 @@ export const Home = () => {
                   <span>Loading...</span>
                 </span>
               ) : (
-                'Load More Articles'
+                "Load More Articles"
               )}
             </button>
           </motion.div>

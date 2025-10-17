@@ -1,15 +1,27 @@
 // src/pages/ArticleView.tsx
-import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Bookmark, Clock, Share2, MoreVertical, ArrowLeft, ThumbsDown } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { message } from 'antd';
-import { debounce } from 'lodash';
-import { getArticle, likeArticle, dislikeArticle } from '../services/apis/userApi';
-import { type ArticleResponseDTO } from '../interfaces/article';
-import { Navbar } from '../components/Navbar';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../redux/store/store';
+import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import {
+  Heart,
+  Bookmark,
+  Clock,
+  Share2,
+  MoreVertical,
+  ArrowLeft,
+  ThumbsDown,
+} from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { message } from "antd";
+import { debounce } from "lodash";
+import {
+  getArticle,
+  likeArticle,
+  dislikeArticle,
+} from "../services/apis/userApi";
+import { type ArticleResponseDTO } from "../interfaces/article";
+import { Navbar } from "../components/Navbar";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store/store";
 
 export const ArticleView = () => {
   const [liked, setLiked] = useState(false);
@@ -24,18 +36,18 @@ export const ArticleView = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       if (!articleId) {
-        message.error('Article ID is missing');
+        message.error("Article ID is missing");
         return;
       }
 
       try {
         const response = await getArticle(articleId, user?._id);
-        console.log('Article from frontend:', response);
+        console.log("Article from frontend:", response);
         setArticle(response.article);
         setLiked(response.article.userInteraction.liked);
         setDisliked(response.article.userInteraction.disliked);
       } catch (error: any) {
-        message.error(error.message || 'Failed to fetch article');
+        message.error(error.message || "Failed to fetch article");
       }
     };
 
@@ -46,7 +58,7 @@ export const ArticleView = () => {
   const handleLike = useCallback(
     debounce(async () => {
       if (!user?._id) {
-        message.error('Please log in to like this article');
+        message.error("Please log in to like this article");
         return;
       }
       if (!articleId) return;
@@ -61,13 +73,17 @@ export const ArticleView = () => {
                 ...prev,
                 likesCount: response.likesCount,
                 dislikesCount: response.dislikesCount,
-                userInteraction: { ...prev.userInteraction, liked: response.liked, disliked: false },
+                userInteraction: {
+                  ...prev.userInteraction,
+                  liked: response.liked,
+                  disliked: false,
+                },
               }
             : prev
         );
-        message.success(response.liked ? 'Article liked!' : 'Like removed');
+        message.success(response.liked ? "Article liked!" : "Like removed");
       } catch (error: any) {
-        message.error(error.message || 'Failed to like article');
+        message.error(error.message || "Failed to like article");
       }
     }, 500),
     [articleId, user?._id]
@@ -77,7 +93,7 @@ export const ArticleView = () => {
   const handleDislike = useCallback(
     debounce(async () => {
       if (!user?._id) {
-        message.error('Please log in to dislike this article');
+        message.error("Please log in to dislike this article");
         return;
       }
       if (!articleId) return;
@@ -92,21 +108,27 @@ export const ArticleView = () => {
                 ...prev,
                 likesCount: response.likesCount,
                 dislikesCount: response.dislikesCount,
-                userInteraction: { ...prev.userInteraction, liked: false, disliked: response.disliked },
+                userInteraction: {
+                  ...prev.userInteraction,
+                  liked: false,
+                  disliked: response.disliked,
+                },
               }
             : prev
         );
-        message.success(response.disliked ? 'Article disliked!' : 'Dislike removed');
+        message.success(
+          response.disliked ? "Article disliked!" : "Dislike removed"
+        );
       } catch (error: any) {
-        message.error(error.message || 'Failed to dislike article');
+        message.error(error.message || "Failed to dislike article");
       }
     }, 500),
     [articleId, user?._id]
   );
 
   const handleBlock = () => {
-    if (confirm('Are you sure you want to block this author?')) {
-      message.success('Author blocked!');
+    if (confirm("Are you sure you want to block this author?")) {
+      message.success("Author blocked!");
       navigate(-1);
     }
   };
@@ -115,7 +137,7 @@ export const ArticleView = () => {
     if (navigator.share) {
       navigator.share({ title: article?.title, url: window.location.href });
     } else {
-      message.success('Share link copied!');
+      message.success("Share link copied!");
     }
   };
 
@@ -141,7 +163,10 @@ export const ArticleView = () => {
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div className="flex items-center space-x-2">
@@ -186,7 +211,9 @@ export const ArticleView = () => {
           <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
-                <span className="text-white font-semibold">{fullName.charAt(0)}</span>
+                <span className="text-white font-semibold">
+                  {fullName.charAt(0)}
+                </span>
               </div>
               <div>
                 <p className="font-semibold text-gray-800">{fullName}</p>
@@ -217,7 +244,10 @@ export const ArticleView = () => {
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6">
             {article.tags?.map((tag, index) => (
-              <span key={index} className="px-3 py-1 bg-purple-50 text-purple-600 text-sm rounded-full">
+              <span
+                key={index}
+                className="px-3 py-1 bg-purple-50 text-purple-600 text-sm rounded-full"
+              >
                 #{tag}
               </span>
             ))}
@@ -230,20 +260,28 @@ export const ArticleView = () => {
                 onClick={handleLike}
                 disabled={!user?._id}
                 className={`flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors ${
-                  !user?._id ? 'opacity-50 cursor-not-allowed' : ''
+                  !user?._id ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                <Heart className={`w-6 h-6 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} />
+                <Heart
+                  className={`w-6 h-6 ${
+                    liked ? "fill-purple-600 text-purple-600" : ""
+                  }`}
+                />
                 <span className="font-medium">{article.likesCount}</span>
               </button>
               <button
                 onClick={handleDislike}
                 disabled={!user?._id}
                 className={`flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors ${
-                  !user?._id ? 'opacity-50 cursor-not-allowed' : ''
+                  !user?._id ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                <ThumbsDown className={`w-6 h-6 ${disliked ? 'fill-red-600 text-red-600' : ''}`} />
+                <ThumbsDown
+                  className={`w-6 h-6 ${
+                    disliked ? "fill-red-600 text-red-600" : ""
+                  }`}
+                />
                 <span className="font-medium">{article.dislikesCount}</span>
               </button>
             </div>
@@ -251,7 +289,13 @@ export const ArticleView = () => {
               onClick={() => setBookmarked(!bookmarked)}
               className="p-2 hover:bg-purple-50 rounded-lg transition-colors"
             >
-              <Bookmark className={`w-6 h-6 ${bookmarked ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} />
+              <Bookmark
+                className={`w-6 h-6 ${
+                  bookmarked
+                    ? "fill-purple-600 text-purple-600"
+                    : "text-gray-600"
+                }`}
+              />
             </button>
           </div>
         </motion.div>

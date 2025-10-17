@@ -39,12 +39,14 @@ export const loginUser = async (userData: any) => {
   }
 };
 
-
 export const changePassword = async (passwordData: any) => {
   try {
-    const response = await userInstance.post(ROUTES.user.changePassword, passwordData);
+    const response = await userInstance.post(
+      ROUTES.user.changePassword,
+      passwordData
+    );
     return response.data;
-  } catch (error: any) {  
+  } catch (error: any) {
     console.error("Error changing password:", error);
     throw {
       message: error.response?.data?.message || "Failed to change password",
@@ -82,7 +84,7 @@ export const getArticle = async (articleId: string, userId?: string) => {
     const response = await userInstance.get(ROUTES.user.article, {
       params: {
         articleId,
-        userId, 
+        userId,
       },
     });
 
@@ -115,20 +117,21 @@ export const createArticle = async (articleData: FormData) => {
   }
 };
 
-
 export const updateArticle = async (articleData: FormData) => {
   try {
-    const response = await userInstance.put(ROUTES.user.articleUpdate, articleData);
+    const response = await userInstance.put(
+      ROUTES.user.articleUpdate,
+      articleData
+    );
     return response.data;
   } catch (error: any) {
     console.error("Article updating failed:", error);
     throw {
       message: error.response?.data?.message || "Failed to update article",
-      code: error.response?.data?.code || "SERVER_ERROR"
+      code: error.response?.data?.code || "SERVER_ERROR",
     };
   }
 };
-
 
 export const getPreferenceArticles = async (
   preferences: IPreference[],
@@ -139,7 +142,7 @@ export const getPreferenceArticles = async (
   try {
     const response = await userInstance.get(ROUTES.user.preferenceArticles, {
       params: {
-        preferences: JSON.stringify(preferences), 
+        preferences: JSON.stringify(preferences),
         limit,
         articleSet,
         userId,
@@ -195,13 +198,16 @@ export const deleteArticle = async (articleId: string) => {
 
 export const updateProfile = async (profileData: any) => {
   try {
-    const response = await userInstance.put(ROUTES.user.updateProfile, profileData);
+    const response = await userInstance.put(
+      ROUTES.user.updateProfile,
+      profileData
+    );
     return response.data;
   } catch (error: any) {
-    console.error('Error in updating profile:', error);
+    console.error("Error in updating profile:", error);
     throw {
-      message: error.response?.data?.message || 'Failed to update profile',
-      code: error.response?.data?.code || 'SERVER_ERROR',
+      message: error.response?.data?.message || "Failed to update profile",
+      code: error.response?.data?.code || "SERVER_ERROR",
     };
   }
 };
@@ -222,8 +228,6 @@ export const updateProfileImage = async (imageData: FormData) => {
     };
   }
 };
-
-
 
 export const likeArticle = async (articleId: string, userId: string) => {
   try {
@@ -258,5 +262,3 @@ export const dislikeArticle = async (articleId: string, userId: string) => {
     };
   }
 };
-
-

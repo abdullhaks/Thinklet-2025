@@ -1,8 +1,8 @@
 // src/components/ArticleCard.tsx
 // import { useState } from "react";
-import { motion } from 'framer-motion';
-import {  Clock  } from 'lucide-react'; // Added ThumbsDown for dislike
-import { type ArticleResponseDTO } from '../interfaces/article';
+import { motion } from "framer-motion";
+import { Clock } from "lucide-react"; // Added ThumbsDown for dislike
+import { type ArticleResponseDTO } from "../interfaces/article";
 import { useNavigate } from "react-router-dom";
 
 interface ArticleCardProps {
@@ -10,11 +10,10 @@ interface ArticleCardProps {
 }
 
 export const ArticleCard = ({ article }: ArticleCardProps) => {
-
   // const [liked, setLiked] = useState(article.userInteraction.liked);
   // const [disliked, setDisliked] = useState(article.userInteraction.disliked);
   // const [bookmarked, setBookmarked] = useState(false); // Local for now, as no bookmark in schema
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const fullName = `${article.author.firstName} ${article.author.lastName}`;
   const createdDate = new Date(article.createdAt).toLocaleDateString();
 
@@ -25,7 +24,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
       className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-purple-50 overflow-hidden cursor-pointer"
-      onClick={()=>navigate(`/article/${article._id}`)}
+      onClick={() => navigate(`/article/${article._id}`)}
     >
       {/* Article Thumbnail */}
       {article.thumbnail && (
@@ -47,25 +46,24 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
       <div className="p-4 sm:p-6">
         {/* Author Info */}
         <div className="flex items-center space-x-3 mb-3">
-
-           { article?.author?.profile ? (
-                  <img
-                    src={article?.author?.profile}
-                    alt="Profile"
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-4 border-purple-100 shadow-md"
-                  />
-                ) : (
-
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
-            <span className="text-white font-semibold text-xs sm:text-sm">
-              {fullName.charAt(0)}
-            </span>
-          </div>
-
-                )}
+          {article?.author?.profile ? (
+            <img
+              src={article?.author?.profile}
+              alt="Profile"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-4 border-purple-100 shadow-md"
+            />
+          ) : (
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+              <span className="text-white font-semibold text-xs sm:text-sm">
+                {fullName.charAt(0)}
+              </span>
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-800 truncate">{fullName}</p>
+            <p className="text-sm font-semibold text-gray-800 truncate">
+              {fullName}
+            </p>
             <div className="flex items-center space-x-2 text-xs text-gray-500">
               <Clock className="w-3 h-3" />
               <span>{createdDate}</span>
@@ -102,14 +100,17 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
               onClick={() => setLiked(!liked)}
               className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
             > */}
-              {/* <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} /> */}
-              <span className="text-xs sm:text-sm font-medium">Like {article.likesCount}</span>
+            {/* <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${liked ? 'fill-purple-600 text-purple-600' : ''}`} /> */}
+            <span className="text-xs sm:text-sm font-medium">
+              Like {article.likesCount}
+            </span>
             {/* </button> */}
-            
-           
-              {/* <ThumbsDown className={`w-4 h-4 sm:w-5 sm:h-5 ${disliked ? 'fill-red-600 text-red-600' : ''}`} /> */}
-              <span className="text-xs sm:text-sm font-medium">Dislike {article.dislikesCount}</span>
-           
+
+            {/* <ThumbsDown className={`w-4 h-4 sm:w-5 sm:h-5 ${disliked ? 'fill-red-600 text-red-600' : ''}`} /> */}
+            <span className="text-xs sm:text-sm font-medium">
+              Dislike {article.dislikesCount}
+            </span>
+
             {/* Removed comments as not in schema */}
           </div>
 

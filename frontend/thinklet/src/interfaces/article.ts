@@ -34,8 +34,7 @@ export interface ArticleResponseDTO {
   updatedAt: Date;
 }
 
-export  interface IArticleData {
-
+export interface IArticleData {
   _id: string;
   title: string;
   description: string;

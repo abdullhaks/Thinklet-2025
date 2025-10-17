@@ -1,5 +1,4 @@
-export 
-const GridBackground = () => (
+export const GridBackground = () => (
   <div className="absolute inset-0 opacity-50 z-0 overflow-hidden">
     <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
       <defs>

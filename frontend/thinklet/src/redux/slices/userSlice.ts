@@ -1,5 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { IUser } from '../../interfaces/user';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { IUser } from "../../interfaces/user";
 
 interface AuthState {
   user: IUser | null;
@@ -23,8 +23,8 @@ const userSlice = createSlice({
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
-    }
-  }
+    },
+  },
 });
 
 export const { loginUser, logoutUser, updateUser } = userSlice.actions;

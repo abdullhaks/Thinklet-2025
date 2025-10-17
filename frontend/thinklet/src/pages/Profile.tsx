@@ -1,23 +1,45 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Camera, Copy, Eye, Save } from 'lucide-react';
-import { Navbar } from '../components/Navbar';
+import { useEffect, useState } from "react";
+import { ArrowLeft, Camera, Copy, Eye, Save } from "lucide-react";
+import { Navbar } from "../components/Navbar";
 import type { RootState } from "../redux/store/store";
 import { useSelector, useDispatch } from "react-redux";
-import { getCategories, updateProfile, updateProfileImage } from "../services/apis/userApi";
+import {
+  getCategories,
+  updateProfile,
+  updateProfileImage,
+} from "../services/apis/userApi";
 import { updateUser } from "../redux/slices/userSlice";
-import { z } from 'zod';
-import { message } from 'antd';
+import { z } from "zod";
+import { message } from "antd";
 import EditProfileModal from "../components/EditProfileModal";
 import PasswordChange from "../components/PasswordChange";
 
 // Define Zod schema for validation
 const profileSchema = z.object({
-  firstName: z.string().trim().min(2, "First name must be at least 2 characters").max(50, "First name must be at most 50 characters"),
-  lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50, "Last name must be at most 50 characters"),
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must be at most 50 characters"),
+  lastName: z
+    .string()
+    .trim()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50, "Last name must be at most 50 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format (e.g., +1234567890)").optional().or(z.literal("")),
-  preferences: z.array(z.string()).min(3, "Select at least 3 interests").max(5, "Select at most 5 interests"),
+  phone: z
+    .string()
+    .regex(
+      /^\+?[1-9]\d{1,14}$/,
+      "Invalid phone number format (e.g., +1234567890)"
+    )
+    .optional()
+    .or(z.literal("")),
+  preferences: z
+    .array(z.string())
+    .min(3, "Select at least 3 interests")
+    .max(5, "Select at most 5 interests"),
 });
 
 export const Profile = () => {
@@ -25,22 +47,24 @@ export const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const [profileData, setProfileData] = useState<any>({
-    _id: user?._id || '',
+    _id: user?._id || "",
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     email: user?.email || "",
-    phone: user?.phone || '',
+    phone: user?.phone || "",
     preferences: user?.preferences.map((item: any) => item._id) || [],
-    profile: user?.profile || '',
+    profile: user?.profile || "",
   });
   const [availablePreferences, setAvailablePreferences] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(profileData.profile || null);
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    profileData.profile || null
+  );
   const [isUploading, setIsUploading] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isPasswordModalOpen,setPasswordModalOpen] = useState(false);
- 
+  const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
+
   useEffect(() => {
     const fetchingCategories = async () => {
       const response = await getCategories();
@@ -54,13 +78,13 @@ export const Profile = () => {
   useEffect(() => {
     // Update profileData when user changes (e.g., after profile update)
     setProfileData({
-      _id: user?._id || '',
+      _id: user?._id || "",
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
-      phone: user?.phone || '',
+      phone: user?.phone || "",
       preferences: user?.preferences.map((item: any) => item._id) || [],
-      profile: user?.profile || '',
+      profile: user?.profile || "",
     });
     setPreviewImage(user?.profile || null);
   }, [user]);
@@ -68,24 +92,27 @@ export const Profile = () => {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrors((prev) => ({ ...prev, profilePic: 'File must be an image' }));
+      if (!file.type.startsWith("image/")) {
+        setErrors((prev) => ({ ...prev, profilePic: "File must be an image" }));
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, profilePic: 'Image size must be less than 5MB' }));
+        setErrors((prev) => ({
+          ...prev,
+          profilePic: "Image size must be less than 5MB",
+        }));
         return;
       }
       setSelectedImage(file);
       setPreviewImage(URL.createObjectURL(file));
-      setErrors((prev) => ({ ...prev, profilePic: '' }));
+      setErrors((prev) => ({ ...prev, profilePic: "" }));
     }
   };
 
   const handleCancelImageUpdate = () => {
     setSelectedImage(null);
     setPreviewImage(profileData.profile || null);
-    setErrors((prev) => ({ ...prev, profilePic: '' }));
+    setErrors((prev) => ({ ...prev, profilePic: "" }));
   };
 
   const handleSaveImage = async () => {
@@ -112,7 +139,9 @@ export const Profile = () => {
   };
 
   const handleCopyReferID = () => {
-    navigator.clipboard.writeText(`www.thinklet.abdullhakalamban.online/id:${profileData._id}`);
+    navigator.clipboard.writeText(
+      `www.thinklet.abdullhakalamban.online/id:${profileData._id}`
+    );
     message.success("Refer ID copied to clipboard!");
   };
 
@@ -139,9 +168,6 @@ export const Profile = () => {
       message.error("Failed to update profile.");
     }
   };
-
-
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -173,7 +199,9 @@ export const Profile = () => {
                 ) : (
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
                     <span className="text-white font-bold text-6xl">
-                      {String(profileData.firstName.charAt(0)).toLocaleUpperCase()}
+                      {String(
+                        profileData.firstName.charAt(0)
+                      ).toLocaleUpperCase()}
                     </span>
                   </div>
                 )}
@@ -187,7 +215,9 @@ export const Profile = () => {
                   />
                 </label>
                 {Object.values(errors).map((item, idx) => (
-                  <p key={idx} className="text-red-600 text-sm">{item}</p>
+                  <p key={idx} className="text-red-600 text-sm">
+                    {item}
+                  </p>
                 ))}
               </div>
 
@@ -198,7 +228,8 @@ export const Profile = () => {
                 <div className="mt-2 sm:mt-3 space-y-2 text-gray-600">
                   <div className="flex items-center gap-2 justify-center sm:justify-start">
                     <span className="text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[300px]">
-                      referral: www.thinklet.abdullhakalamban.online/id:{profileData._id}
+                      referral: www.thinklet.abdullhakalamban.online/id:
+                      {profileData._id}
                     </span>
                     <button
                       onClick={handleCopyReferID}
@@ -210,12 +241,15 @@ export const Profile = () => {
                   </div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start">
                     <span className="text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[300px]">
-                      interests: {profileData.preferences
-                        .map((id: string) => 
-                          availablePreferences.find((p: any) => p._id === id)?.name || ''
+                      interests:{" "}
+                      {profileData.preferences
+                        .map(
+                          (id: string) =>
+                            availablePreferences.find((p: any) => p._id === id)
+                              ?.name || ""
                         )
                         .filter(Boolean)
-                        .join(', ') || "None"}
+                        .join(", ") || "None"}
                     </span>
                   </div>
                 </div>
@@ -250,13 +284,12 @@ export const Profile = () => {
                 </button>
 
                 <button
-                  onClick={()=>setPasswordModalOpen(true)}
+                  onClick={() => setPasswordModalOpen(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
                 >
                   <Eye size={16} />
                   <span>Change Password</span>
                 </button>
-
               </div>
             </div>
           </div>
@@ -283,11 +316,13 @@ export const Profile = () => {
                 <p className="text-xs sm:text-sm text-gray-500">Interests</p>
                 <p className="text-sm sm:text-base text-gray-900">
                   {profileData.preferences
-                    .map((id: string) => 
-                      availablePreferences.find((p: any) => p._id === id)?.name || ''
+                    .map(
+                      (id: string) =>
+                        availablePreferences.find((p: any) => p._id === id)
+                          ?.name || ""
                     )
                     .filter(Boolean)
-                    .join(', ') || "None"}
+                    .join(", ") || "None"}
                 </p>
               </div>
             </div>
@@ -311,15 +346,9 @@ export const Profile = () => {
         />
       </div>
 
-
-    {isPasswordModalOpen && 
-
-    <PasswordChange setPasswordModalOpen={setPasswordModalOpen}/>
-
-    }
-
-
-
+      {isPasswordModalOpen && (
+        <PasswordChange setPasswordModalOpen={setPasswordModalOpen} />
+      )}
     </div>
   );
 };
