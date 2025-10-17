@@ -4,13 +4,22 @@ import { Request, Response } from 'express';
 
 import { HttpStatusCode } from '../../../utils/enum';
 import { MESSAGES } from '../../../utils/messages';
-import { getCategories } from '../../../services/implementations/user/categoryService';
+import ICategoryController from '../../interfaces/user/ICategoryController';
+import { inject, injectable } from 'inversify';
+import ICategoryService from '../../../services/interfaces/user/ICategoryService';
 
-export const categories = async (req: Request, res: Response): Promise<void> => {
+@injectable()
+export default class CategoryController implements ICategoryController {
+
+  constructor (
+    @inject("ICategoryService") private _categoryService : ICategoryService
+  ){}
+
+
+async categories(req: Request, res: Response): Promise<void>  {
   try {
-    
-
-    const categories = await getCategories();
+   
+    const categories =  await this._categoryService.getCategories();
 
     console.log("user is ", categories);
 
@@ -23,3 +32,7 @@ export const categories = async (req: Request, res: Response): Promise<void> => 
     });
   }
 };
+
+
+
+}
