@@ -39,6 +39,20 @@ export const loginUser = async (userData: any) => {
   }
 };
 
+
+export const changePassword = async (passwordData: any) => {
+  try {
+    const response = await userInstance.post(ROUTES.user.changePassword, passwordData);
+    return response.data;
+  } catch (error: any) {  
+    console.error("Error changing password:", error);
+    throw {
+      message: error.response?.data?.message || "Failed to change password",
+      code: error.response?.data?.code || "SERVER_ERROR",
+    };
+  }
+};
+
 export const accessToken = async () => {
   try {
     const response = await userInstance.get(ROUTES.user.accessToken);

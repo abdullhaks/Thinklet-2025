@@ -4,6 +4,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 import IProfileService from "../../interfaces/user/IProfileService";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import ICategoryRepository from "../../../repositories/interfaces/IcategoryRepository";
+import bcrypt from 'bcryptjs';
 
 interface IProfile {
   buffer: Buffer;
@@ -140,6 +141,50 @@ async updateProfileService(profileData: IProfileData): Promise<any> {
 
     return { userData: newUser };
 };
+
+
+async changePasswordService(userId: string, oldPassword: string, newPassword: string, confirmPassword: string): Promise<any> {
+  
+    const user = await this._userRepository.findOne({ _id: userId });
+    if (!user) {
+        throw {
+            status: HttpStatusCode.NOT_FOUND,
+            message: 'User not found',
+            code: 'USER_NOT_FOUND',
+        };
+    }
+
+    const isOldPasswordValid =  await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+        throw {
+            status: HttpStatusCode.UNAUTHORIZED,
+            message: 'Old password is incorrect',
+            code: 'INVALID_OLD_PASSWORD',
+        };
+    }
+
+
+    if (newPassword !== confirmPassword) {
+    throw {
+      status: HttpStatusCode.BAD_REQUEST,
+      message: "Passwords do not match",
+      code: "PASSWORD_MISMATCH"
+    };
+  };
+
+
+    const salt = await bcrypt.genSalt(10);
+    let hashedPass = await bcrypt.hash(newPassword, salt);
+
+    await this._userRepository.update(userId, { password: hashedPass });
+
+    return { message: "Password changed successfully" };
+
+
+
+}
+
+
 
 
 

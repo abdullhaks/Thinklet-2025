@@ -1,17 +1,28 @@
 import { useState } from "react";
 import { FormInput } from "./FormInput"
 import { X } from "lucide-react";
+import { changePassword } from "../services/apis/userApi";
+import { message } from "antd";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store/store";
 
 
 function PasswordChange({setPasswordModalOpen}:{setPasswordModalOpen:any}) {
     
- const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const user = useSelector((state: RootState) => state.user.user);
+
+
 
     const [formData, setFormData] = useState<{
+    userId: string;
+    oldPassword: string;
     password: string;
     confirmPassword: string;
   }>({
+    userId: user?._id || '',
+    oldPassword: '',
     password: '',
     confirmPassword: '',
   });
@@ -25,6 +36,19 @@ const validateField = (name: string, value: any) => {
         const newErrors = { ...errors };
     
         switch (name) {
+
+          case 'oldPassword':
+            if (!value) {
+              newErrors.oldPassword = 'old Password is required';
+            } else if (value.length < 8) {
+              newErrors.oldPassword = 'old Password must be at least 8 characters';
+            } else if (value.length > 128) {
+              newErrors.oldPassword = 'old Password must be less than 128 characters';
+            } else {
+              newErrors.oldPassword = '';
+            }
+            break;
+
           case 'password':
             if (!value) {
               newErrors.password = 'Password is required';
@@ -58,13 +82,49 @@ const validateField = (name: string, value: any) => {
       };
     
     
-       const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
         validateField(name, value);
-      };
+    };
 
+ const handleSubmit = async(e: React.FormEvent) => {
+    e.preventDefault();
 
+    try {
+      const isValid = validateField('password', formData.password) &&
+                      validateField('confirmPassword', formData.confirmPassword)&&
+                      validateField('oldPassword', formData.oldPassword);
+
+      if (!isValid) {
+        message.error("Please fix the form errors");
+        return;
+      }
+
+      const response = await changePassword(formData);
+      if (response) {
+        message.success("Password changed successfully");
+        setPasswordModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error("password changing error:", error);
+      const errorCode = error.code || "SERVER_ERROR";
+      switch (errorCode) {
+        case "INVALID_OLD_PASSWORD":
+          setErrors(prev => ({ ...prev, oldPassword: "old password not matching" }));
+          break;
+        case "PASSWORD_MISMATCH":
+          setErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+          break;
+       
+        default:
+          message.error(error.message || "Failed to change password");
+      }
+    }
+   
+  };
+
+  
     
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 overflow-y-auto">
@@ -84,6 +144,20 @@ const validateField = (name: string, value: any) => {
 
         <div className="p-4 sm:p-6 md:p-8">
           <div className="space-y-5 sm:space-y-6">
+
+            <FormInput
+                label="Old Password"
+                type={"text"}
+                name="oldPassword"
+                value={formData.oldPassword}
+                onChange={handleChange}
+                error={errors.oldPassword}
+                placeholder="Min 8 characters"
+                maxLength={128}
+                showPasswordToggle={true}
+                onTogglePassword={() => setShowPassword(!showPassword)}
+              />
+
              <FormInput
                 label="Password"
                 type={showPassword ? "text" : "password"}
@@ -125,7 +199,7 @@ const validateField = (name: string, value: any) => {
             </button>
             <button
               type="submit"
-            //   onClick={handleSubmit}
+              onClick={handleSubmit}
               className="w-full sm:w-auto px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 active:scale-95"
             >
               Save Changes

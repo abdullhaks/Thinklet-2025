@@ -23,7 +23,22 @@ export default class ProfileController implements IProfileController {
     ){}
 
 
-
+async changePassword(req: any, res: any): Promise<void> {
+    try {
+        const { userId, oldPassword, password, confirmPassword } = req.body;
+        if (!userId || !oldPassword || !password || !confirmPassword) {
+            return res.status(400).json({ message: "Missing required fields", code: "MISSING_FIELDS" });
+        }
+        await this._profileService.changePasswordService(userId, oldPassword, password, confirmPassword);
+        return res.status(200).json({ message: "Password changed successfully" });
+    } catch (error: any) {
+        console.error("Error in changing password:", error);
+        return res.status(error.status || 500).json({
+            message: error.message || "Internal server error",
+            code: error.code || "SERVER_ERROR",
+        });
+    }
+}
 
 
 

@@ -16,7 +16,8 @@ export const ROUTES = {
     myArticle:"/user/myArticle",
     updateProfile : "/user/updateProfile",
     updateProfileImage : "/user/updateProfileImage",
-    articleUpdate:"/user/articleUpdate"
+    articleUpdate:"/user/articleUpdate",
+    changePassword : "/user/changePassword",
     
   },
 
