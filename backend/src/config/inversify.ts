@@ -16,7 +16,8 @@ import IAuthController from "../controllers/interfaces/user/IAuthController";
 import CategoryController from "../controllers/implementations/user/categoryController";
 import ICategoryController from "../controllers/interfaces/user/ICategoryController";
 
-
+import ProfileController from "../controllers/implementations/user/profileController";
+import IProfileController from "../controllers/interfaces/user/IProfileController";
 
 
 //services
@@ -30,6 +31,9 @@ import IAuthService from "../services/interfaces/user/IAuthService";
 import CategoryService from "../services/implementations/user/categoryService";
 import ICategoryService from "../services/interfaces/user/ICategoryService";
 
+
+import ProfileService from "../services/implementations/user/profileService";
+import IProfileService from "../services/interfaces/user/IProfileService";  
 
 
 
@@ -70,6 +74,7 @@ container.bind<ICategoryRepository>("ICategoryRepository").to(CategoryRepository
 container.bind<IArticleService>("IArticleService").to(ArticleService);
 container.bind<IAuthService>("IAuthService").to(AuthService);
 container.bind<ICategoryService>("ICategoryService").to(CategoryService);
+container.bind<IProfileService>("IProfileService").to(ProfileService);
 
 
 
@@ -77,6 +82,8 @@ container.bind<ICategoryService>("ICategoryService").to(CategoryService);
 container.bind<IArticleController>("IArticleController").to(ArticleController);
 container.bind<IAuthController>("IAuthController").to(AuthController);
 container.bind<ICategoryController>("ICategoryController").to(CategoryController);
+container.bind<IProfileController>("IProfileController").to(ProfileController);
+
 
 
 

@@ -1,4 +1,6 @@
-import { updateProfileImageService, updateProfileService } from "../../../services/implementations/user/profileService";
+import { inject, injectable } from "inversify";
+import IProfileController from "../../interfaces/user/IProfileController";
+import IProfileService from "../../../services/interfaces/user/IProfileService";
 
 interface MulterFile {
   fieldname: string;
@@ -13,7 +15,20 @@ type MulterFiles = {
   [fieldname: string]: MulterFile[];
 };
 
-export const updateProfileImageController = async (req:any, res:any) => {
+@injectable()
+export default class ProfileController implements IProfileController {
+
+    constructor (
+        @inject("IProfileService") private _profileService : IProfileService
+    ){}
+
+
+
+
+
+
+
+async updateProfileImageController(req:any, res:any): Promise<void> {
     try {
         if (!req.body.userId || !req.files || !req.files['profile'] || req.files['profile'].length === 0) {
             return res.status(400).json({ message: "No profile image uploaded", code: "NO_FILE" });
@@ -32,7 +47,7 @@ export const updateProfileImageController = async (req:any, res:any) => {
           : undefined
       const userId = req.body.userId;
 
-      const response = await updateProfileImageService (userId,profile);
+      const response = await this._profileService.updateProfileImageService (userId,profile);
        
     return res.status(200).json({ message: "Profile image updated successfully",userData: response.userData });
     } catch (error) {
@@ -42,7 +57,7 @@ export const updateProfileImageController = async (req:any, res:any) => {
 };
 
 
-export const updateProfileController = async (req: any, res: any) => {
+async updateProfileController(req: any, res: any): Promise<void> {
     try {
         const { userId, firstName, lastName, email, phone, preferences } = req.body;
 
@@ -59,7 +74,7 @@ export const updateProfileController = async (req: any, res: any) => {
             preferences: preferences,
         };
 
-        const response = await updateProfileService(profileData);
+        const response = await this._profileService.updateProfileService(profileData);
         return res.status(200).json({ message: "Profile updated successfully", userData: response.userData });
     } catch (error: any) {
         console.error("Error in updating profile:", error);
@@ -69,3 +84,6 @@ export const updateProfileController = async (req: any, res: any) => {
         });
     }
 };
+
+
+}

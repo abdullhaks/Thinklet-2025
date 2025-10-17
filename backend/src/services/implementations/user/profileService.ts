@@ -1,7 +1,9 @@
+import { inject, injectable } from "inversify";
 import { uploadFileToS3 } from "../../../helpers/uploadS3";
-import Category from "../../../models/category";
-import User from "../../../models/user";
 import { HttpStatusCode } from "../../../utils/enum";
+import IProfileService from "../../interfaces/user/IProfileService";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import ICategoryRepository from "../../../repositories/interfaces/IcategoryRepository";
 
 interface IProfile {
   buffer: Buffer;
@@ -18,11 +20,17 @@ interface IProfileData {
   preferences: string[];
 }
 
+@injectable()
+export default class ProfileService implements IProfileService {
+  
+  constructor(
+    @inject("IUserRepository") private _userRepository : IUserRepository,
+    @inject("ICategoryRepository") private _categoryRepository : ICategoryRepository
+  ){}
 
 
-export const updateProfileImageService = async (userId: string, profile: IProfile | undefined): Promise<any> => {
 
- 
+async updateProfileImageService(userId: string, profile: IProfile | undefined): Promise<any> {
 
         let profileUrl: string | undefined = undefined;
         if (profile) {
@@ -44,7 +52,8 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
 
             if(profileUrl){
 
-            const updatedData = await User.findByIdAndUpdate(userId, { profile: profileUrl }, { new: true });
+            
+            const updatedData = await this._userRepository.update(userId,{ profile: profileUrl })
             if (!updatedData) {
                 throw {
                     status: HttpStatusCode.NOT_FOUND,
@@ -57,8 +66,9 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
             let { password, ...rest } = updatedData.toObject();
 
             let preferences = await Promise.all(
-                rest.preferences.map(async (prefId) => {
-                  let prefData = await Category.findOne({ _id: prefId });
+                rest.preferences.map(async (prefId:string) => {
+                  
+                  let prefData = await this._categoryRepository.findOne({ _id: prefId });
                   return { _id: prefData?._id, name: prefData?.name };
                 })
               );
@@ -87,20 +97,19 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
     
 
 
-    export const updateProfileService = async (profileData: IProfileData): Promise<any> => {
+async updateProfileService(profileData: IProfileData): Promise<any> {
     const { userId, firstName, lastName, email, phone, preferences } = profileData;
 
-    const updatedData = await User.findByIdAndUpdate(
-        userId,
-        {
+    
+
+    const updatedData = await this._userRepository.update(userId,{
             firstName,
             lastName,
             email,
             phone,
             preferences,
-        },
-        { new: true }
-    );
+        });
+
 
     if (!updatedData) {
         throw {
@@ -113,8 +122,8 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
     let { password, ...rest } = updatedData.toObject();
 
             let newPreferences = await Promise.all(
-                rest.preferences.map(async (prefId) => {
-                  let prefData = await Category.findOne({ _id: prefId });
+                rest.preferences.map(async (prefId:string) => {
+                  let prefData = await this._categoryRepository.findOne({ _id: prefId });
                   return { _id: prefData?._id, name: prefData?.name };
                 })
               );
@@ -131,3 +140,7 @@ export const updateProfileImageService = async (userId: string, profile: IProfil
 
     return { userData: newUser };
 };
+
+
+
+}
