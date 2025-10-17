@@ -1,11 +1,20 @@
-import Category from '../../../models/category';
-import { HttpStatusCode } from '../../../utils/enum';
+import { inject, injectable } from 'inversify';
+import ICategoryService from '../../interfaces/user/ICategoryService';
+import ICategoryRepository from '../../../repositories/interfaces/IcategoryRepository';
 
 
-export const getCategories = async (): Promise<any> => {
+@injectable()
+export default class CategoryService implements ICategoryService{
+
+
+  constructor(
+    @inject("ICategoryRepository") private _categoryRepository : ICategoryRepository
+  ){}
+
+
+async getCategories(): Promise<any> {
  
-
-  const categories = await Category.find();
+  const categories =   await this._categoryRepository.findAll();
   console.log("categories...: ", categories);
  
   return {
@@ -14,3 +23,7 @@ export const getCategories = async (): Promise<any> => {
   };
   
 };
+
+
+
+}
