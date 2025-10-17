@@ -1,6 +1,10 @@
 import { uploadFileToS3 } from "../../../helpers/uploadS3";
 import { HttpStatusCode } from "../../../utils/enum";
-import { ArticleResponseDTO, articleUpdateRequestDTO, IArticleData } from "../../../dto/articleDto";
+import {
+  ArticleResponseDTO,
+  articleUpdateRequestDTO,
+  IArticleData,
+} from "../../../dto/articleDto";
 import { IPreference } from "../../../dto/userDto";
 import { inject, injectable } from "inversify";
 import IArticleService from "../../interfaces/user/IArticleService";
@@ -233,60 +237,68 @@ export default class ArticleService implements IArticleService {
     }
   }
 
-async updateArticleService(articleData: articleUpdateRequestDTO): Promise<{article: ArticleResponseDTO }> {
-  const { _id, title, description, category, tags, author, thumbnail } = articleData;
+  async updateArticleService(
+    articleData: articleUpdateRequestDTO
+  ): Promise<{ article: ArticleResponseDTO }> {
+    const { _id, title, description, category, tags, author, thumbnail } =
+      articleData;
 
-  const updateData: any = {
-    title,
-    description,
-    category,
-    tags,
-    author,
-  };
-
-  let tempUrl = 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/thinklet_thumbnails/download+(3).jfif'
-  if (thumbnail !== undefined) {
-    let thumbnailUrl: string | null = null;
-    if (typeof thumbnail === 'string') {
-      thumbnailUrl = thumbnail === '' ? tempUrl : thumbnail;
-    } else if (thumbnail) {
-      const uploadResult = await uploadFileToS3(
-        thumbnail.buffer,
-        thumbnail.originalname,
-        'thinklet_thumbnails',
-        thumbnail.mimetype
-      );
-      if (!uploadResult?.fileUrl) {
-        throw {
-          status: HttpStatusCode.INTERNAL_SERVER_ERROR,
-          message: 'Failed to upload thumbnail',
-          code: 'THUMBNAIL_UPLOAD_FAILED',
-        };
-      }
-      thumbnailUrl = uploadResult.fileUrl;
-    }
-    if (thumbnailUrl !== null) {
-      updateData.thumbnail = thumbnailUrl;
-    } else {
-      updateData.thumbnail = null;
-    }
-  }
-
-  const updatedArticle = await this._articleRepository.update(_id, updateData);
-  if (!updatedArticle) {
-    throw {
-      status: HttpStatusCode.NOT_FOUND,
-      message: 'Article not found',
-      code: 'ARTICLE_NOT_FOUND',
+    const updateData: any = {
+      title,
+      description,
+      category,
+      tags,
+      author,
     };
+
+    let tempUrl =
+      "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/thinklet_thumbnails/download+(3).jfif";
+    if (thumbnail !== undefined) {
+      let thumbnailUrl: string | null = null;
+      if (typeof thumbnail === "string") {
+        thumbnailUrl = thumbnail === "" ? tempUrl : thumbnail;
+      } else if (thumbnail) {
+        const uploadResult = await uploadFileToS3(
+          thumbnail.buffer,
+          thumbnail.originalname,
+          "thinklet_thumbnails",
+          thumbnail.mimetype
+        );
+        if (!uploadResult?.fileUrl) {
+          throw {
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+            message: "Failed to upload thumbnail",
+            code: "THUMBNAIL_UPLOAD_FAILED",
+          };
+        }
+        thumbnailUrl = uploadResult.fileUrl;
+      }
+      if (thumbnailUrl !== null) {
+        updateData.thumbnail = thumbnailUrl;
+      } else {
+        updateData.thumbnail = null;
+      }
+    }
+
+    const updatedArticle = await this._articleRepository.update(
+      _id,
+      updateData
+    );
+    if (!updatedArticle) {
+      throw {
+        status: HttpStatusCode.NOT_FOUND,
+        message: "Article not found",
+        code: "ARTICLE_NOT_FOUND",
+      };
+    }
+
+    const updated = await this.getArticleResponse(
+      updatedArticle._id.toString(),
+      updatedArticle.author.toString()
+    );
+
+    return { article: updated };
   }
-
-  const updated = await this.getArticleResponse(updatedArticle._id.toString(), updatedArticle.author.toString());
-
-  return { article: updated };
-};
-
-
 
   async getPreferenceArticlesService(
     preferences: IPreference[],
@@ -312,8 +324,7 @@ async updateArticleService(articleData: articleUpdateRequestDTO): Promise<{artic
         { sort: { createdAt: -1 }, limit: limit, skip: skip }
       );
 
-
-      console.log("articles are.............................",articles)
+      console.log("articles are.............................", articles);
 
       const formattedArticles = await Promise.all(
         articles.map(async (article) => {
@@ -321,9 +332,10 @@ async updateArticleService(articleData: articleUpdateRequestDTO): Promise<{artic
         })
       );
 
-
-      console.log("formattedArticles are.............................",formattedArticles)
-
+      console.log(
+        "formattedArticles are.............................",
+        formattedArticles
+      );
 
       return { articles: formattedArticles };
     } catch (error: any) {
@@ -569,10 +581,4 @@ async updateArticleService(articleData: articleUpdateRequestDTO): Promise<{artic
       };
     }
   }
-
-
-
-
-
-
 }

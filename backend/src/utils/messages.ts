@@ -12,7 +12,6 @@ export const MESSAGES = {
     notFound: "Analytics data not found.",
   },
 
-
   user: {
     notFound: "Article not found",
     articlesFetched: "Articles fetched successfully",

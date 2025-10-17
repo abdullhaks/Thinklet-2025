@@ -1,7 +1,3 @@
-
-
-
 export default interface ICategoryService {
-
-    getCategories(): Promise<any>
+  getCategories(): Promise<any>;
 }

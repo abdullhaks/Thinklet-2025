@@ -19,7 +19,6 @@ import ICategoryController from "../controllers/interfaces/user/ICategoryControl
 import ProfileController from "../controllers/implementations/user/profileController";
 import IProfileController from "../controllers/interfaces/user/IProfileController";
 
-
 //services
 import ArticleService from "../services/implementations/user/articleService";
 import IArticleService from "../services/interfaces/user/IArticleService";
@@ -27,15 +26,11 @@ import IArticleService from "../services/interfaces/user/IArticleService";
 import AuthService from "../services/implementations/user/authService";
 import IAuthService from "../services/interfaces/user/IAuthService";
 
-
 import CategoryService from "../services/implementations/user/categoryService";
 import ICategoryService from "../services/interfaces/user/ICategoryService";
 
-
 import ProfileService from "../services/implementations/user/profileService";
-import IProfileService from "../services/interfaces/user/IProfileService";  
-
-
+import IProfileService from "../services/interfaces/user/IProfileService";
 
 //repositories
 import ArticleRepository from "../repositories/implementations/articleRepository";
@@ -58,16 +53,15 @@ container.bind("categoryModel").toConstantValue(Category);
 container.bind("userModel").toConstantValue(User);
 container.bind("interactionModel").toConstantValue(Interaction);
 
-
-
 //repository binding
 container.bind<IArticleRepository>("IArticleRepository").to(ArticleRepository);
-container.bind<IInteractionRepository>("IInteractionRepository").to(InteractionRepository);
+container
+  .bind<IInteractionRepository>("IInteractionRepository")
+  .to(InteractionRepository);
 container.bind<IUserRepository>("IUserRepository").to(UserRepository);
-container.bind<ICategoryRepository>("ICategoryRepository").to(CategoryRepository);
-
-
-
+container
+  .bind<ICategoryRepository>("ICategoryRepository")
+  .to(CategoryRepository);
 
 //service binding
 
@@ -76,15 +70,12 @@ container.bind<IAuthService>("IAuthService").to(AuthService);
 container.bind<ICategoryService>("ICategoryService").to(CategoryService);
 container.bind<IProfileService>("IProfileService").to(ProfileService);
 
-
-
 //controller binding
 container.bind<IArticleController>("IArticleController").to(ArticleController);
 container.bind<IAuthController>("IAuthController").to(AuthController);
-container.bind<ICategoryController>("ICategoryController").to(CategoryController);
+container
+  .bind<ICategoryController>("ICategoryController")
+  .to(CategoryController);
 container.bind<IProfileController>("IProfileController").to(ProfileController);
-
-
-
 
 export default container;

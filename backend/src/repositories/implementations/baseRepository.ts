@@ -25,7 +25,7 @@ export default class BaseRepository<T extends Document>
     }
   }
 
-  async countDocument (filter: FilterQuery<T> = {}): Promise<number> {
+  async countDocument(filter: FilterQuery<T> = {}): Promise<number> {
     try {
       return await this._model.countDocuments(filter).exec();
     } catch (error) {
@@ -75,9 +75,7 @@ export default class BaseRepository<T extends Document>
   }
 
   async create(data: Partial<T>): Promise<T> {
-
     try {
-
       const createdDocument = new this._model(data);
 
       return await createdDocument.save();

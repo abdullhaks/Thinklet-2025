@@ -5,7 +5,6 @@ import connectDB from "./config/dbConnection";
 import cors from "cors";
 import userRouter from "./routes/userRoutes";
 
-
 dotenv.config();
 
 const app = express();
@@ -28,13 +27,8 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
-
-app.use('/api/user',userRouter);
-
-
-
+app.use("/api/user", userRouter);
 
 app.listen(port, () => {
   console.log(`MyHealth is running on port 3000 http://localhost:${port}`);
 });
-

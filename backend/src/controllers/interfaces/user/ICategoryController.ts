@@ -1,6 +1,5 @@
-import { Request,Response } from "express"
-
+import { Request, Response } from "express";
 
 export default interface ICategoryController {
-    categories(req: Request, res: Response): Promise<void>
+  categories(req: Request, res: Response): Promise<void>;
 }

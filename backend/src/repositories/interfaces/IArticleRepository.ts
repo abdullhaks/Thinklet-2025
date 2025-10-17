@@ -1,13 +1,7 @@
 import BaseRepository from "../implementations/baseRepository";
-import { articleDocument, IArticleDocument } from "../../entities/articleEntity";
-import { ArticleResponseDTO } from "../../dto/articleDto";
+import { IArticleDocument } from "../../entities/articleEntity";
 
-
-
-export default interface IArticleRepository extends BaseRepository<IArticleDocument> {
-  
-getArticle(id: string): Promise<any | null>;
-
-
-    
-};
+export default interface IArticleRepository
+  extends BaseRepository<IArticleDocument> {
+  getArticle(id: string): Promise<any | null>;
+}

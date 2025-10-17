@@ -4,28 +4,28 @@
 import { Types } from "mongoose";
 
 interface Category {
-  _id: string ;
+  _id: string;
   name: string;
 }
 
 interface Author {
-  _id: string ;
+  _id: string;
   firstName: string;
   lastName: string;
   profile?: string;
 }
 
 interface UserInteraction {
-  liked: boolean ;
+  liked: boolean;
   disliked: boolean;
   blocked: boolean;
 }
 
 export interface ArticleResponseDTO {
-  _id: string ;
+  _id: string;
   title: string;
   description: string;
-  thumbnail?: string | null |undefined;
+  thumbnail?: string | null | undefined;
   tags?: string[];
   category: Category;
   author: Author;
@@ -34,12 +34,9 @@ export interface ArticleResponseDTO {
   userInteraction: UserInteraction;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-
-
-export  interface IArticleData {
-
+export interface IArticleData {
   _id: string | Types.ObjectId;
   title: string;
   description: string;
@@ -49,7 +46,7 @@ export  interface IArticleData {
   author: string;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
 interface IThumbnail {
   buffer: Buffer;
@@ -58,11 +55,13 @@ interface IThumbnail {
 }
 
 export interface articleUpdateRequestDTO {
-
-  _id: string 
+  _id: string;
   title: string;
   description: string;
-  thumbnail?: string | { buffer: Buffer; originalname: string; mimetype: string; } | undefined ;
+  thumbnail?:
+    | string
+    | { buffer: Buffer; originalname: string; mimetype: string }
+    | undefined;
   tags?: string[];
   category: string;
   author: string;

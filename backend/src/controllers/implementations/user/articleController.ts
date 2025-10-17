@@ -24,7 +24,7 @@ export default class ArticleController implements IArticleController {
   constructor(
     @inject("IArticleService") private _articleService: IArticleService
   ) {
-      console.log(
+    console.log(
       "ArticleService constructor - _articleRepository:",
       !!this._articleService
     );
@@ -65,51 +65,59 @@ export default class ArticleController implements IArticleController {
     }
   }
 
+  async updateArticleController(req: any, res: any): Promise<void> {
+    try {
+      const { articleId, title, description, category, tags, author } =
+        req.body;
+      if (!articleId || !title || !description || !category || !author) {
+        return res
+          .status(400)
+          .json({ message: "Missing required fields", code: "MISSING_FIELDS" });
+      }
 
-  
-async updateArticleController(req: any, res: any): Promise<void>  {
-  try {
-    const { articleId, title, description, category, tags, author } = req.body;
-    if (!articleId || !title || !description || !category || !author) {
-      return res.status(400).json({ message: "Missing required fields", code: "MISSING_FIELDS" });
-    }
+      const thumbnailFile = (req.files as MulterFiles)?.thumbnail?.[0];
+      let thumbnail:
+        | string
+        | { buffer: Buffer; originalname: string; mimetype: string }
+        | undefined = undefined;
 
-    const thumbnailFile = (req.files as MulterFiles)?.thumbnail?.[0];
-    let thumbnail: string | { buffer: Buffer; originalname: string; mimetype: string; } | undefined = undefined;
+      if (thumbnailFile) {
+        thumbnail = {
+          buffer: thumbnailFile.buffer,
+          originalname: thumbnailFile.originalname,
+          mimetype: thumbnailFile.mimetype,
+        };
+      } else if ("thumbnail" in req.body) {
+        thumbnail = req.body.thumbnail;
+      }
 
-    if (thumbnailFile) {
-      thumbnail = {
-        buffer: thumbnailFile.buffer,
-        originalname: thumbnailFile.originalname,
-        mimetype: thumbnailFile.mimetype,
+      const articleData = {
+        _id: articleId,
+        title,
+        description,
+        category,
+        tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
+        author,
+        thumbnail,
       };
-    } else if ('thumbnail' in req.body) {
-      thumbnail = req.body.thumbnail;
+
+      const response = await this._articleService.updateArticleService(
+        articleData
+      );
+      return res
+        .status(200)
+        .json({
+          message: "Article updated successfully",
+          article: response.article,
+        });
+    } catch (error: any) {
+      console.error("Error in updating article:", error);
+      return res.status(error.status || 500).json({
+        message: error.message || "Internal server error",
+        code: error.code || "SERVER_ERROR",
+      });
     }
-
-    const articleData = {
-      _id: articleId,
-      title,
-      description,
-      category,
-      tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
-      author,
-      thumbnail,
-    };
-
-    const response = await this._articleService.updateArticleService(articleData);
-    return res.status(200).json({ message: "Article updated successfully", article: response.article });
-  } catch (error: any) {
-    console.error("Error in updating article:", error);
-    return res.status(error.status || 500).json({
-      message: error.message || "Internal server error",
-      code: error.code || "SERVER_ERROR",
-    });
   }
-};
-
-
-
 
   async getPreferenceArticlesController(
     req: Request,

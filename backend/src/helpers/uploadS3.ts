@@ -82,5 +82,5 @@ export async function uploadFileToS3(
 
   const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFileName}`;
 
-  return {uniqueFileName,fileUrl};
+  return { uniqueFileName, fileUrl };
 }

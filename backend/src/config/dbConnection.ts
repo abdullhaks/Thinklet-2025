@@ -6,7 +6,6 @@ export let dbInstance: Mongoose; // Mongoose type
 
 const connectDB = async (): Promise<void> => {
   console.log("db connecting started.. ");
-  
 
   try {
     if (process.env.MONGODB_URL) {

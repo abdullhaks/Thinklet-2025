@@ -7,7 +7,7 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET as string;
 
 export const generateAccessToken = (data: {
   id: string;
-  role: "user" | "admin" ;
+  role: "user" | "admin";
 }): string => {
   return jwt.sign({ id: data.id, role: data.role }, ACCESS_TOKEN_SECRET, {
     expiresIn: "30s",

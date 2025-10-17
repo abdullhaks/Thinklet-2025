@@ -1,37 +1,42 @@
-import { Request, Response } from 'express';
-import { HttpStatusCode } from '../../../utils/enum';
-import { MESSAGES } from '../../../utils/messages';
-import { inject, injectable } from 'inversify';
-import IAuthController from '../../interfaces/user/IAuthController';
-import IAuthService from '../../../services/interfaces/user/IAuthService';
-
-
+import { Request, Response } from "express";
+import { HttpStatusCode } from "../../../utils/enum";
+import { MESSAGES } from "../../../utils/messages";
+import { inject, injectable } from "inversify";
+import IAuthController from "../../interfaces/user/IAuthController";
+import IAuthService from "../../../services/interfaces/user/IAuthService";
 
 @injectable()
 export default class AuthController implements IAuthController {
+  constructor(@inject("IAuthService") private _authService: IAuthService) {}
 
-constructor(
-  @inject("IAuthService") private _authService : IAuthService
-){}
+  async signup(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        phone,
+        preferences,
+      } = req.body;
 
+      const userDetails = {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        phone,
+        preferences,
+      };
 
+      console.log("user details is ", userDetails);
 
+      const response = await this._authService.signupUser(userDetails);
 
-
-
-async signup(req: Request, res: Response): Promise<void> {
-  try {
-    const { firstName, lastName, email, password, confirmPassword, phone, preferences } = req.body;
-
-    const userDetails = { firstName, lastName, email, password, confirmPassword, phone, preferences };
-
-    console.log("user details is ", userDetails);
-
-    
-    const response = await this._authService.signupUser(userDetails);
-
-    console.log("user is ", response.user);
-    res.cookie("thinklet_refreshToken", response.refreshToken, {
+      console.log("user is ", response.user);
+      res.cookie("thinklet_refreshToken", response.refreshToken, {
         httpOnly: true,
         sameSite: "none", // allow cross-site
         secure: true, // only over HTTPS
@@ -44,58 +49,61 @@ async signup(req: Request, res: Response): Promise<void> {
         secure: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
       });
-      
-    res.status(HttpStatusCode.CREATED).json(response.user);
-  } catch (error: any) {
-    console.error("Error in signup:", error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR'
-    });
-  }
-};
 
-
-async login(req: Request, res: Response): Promise<void>  {
-  try {
-    const { emailOrPhone, password } = req.body;
-
-    if (!emailOrPhone || !password) {
-      res.status(HttpStatusCode.BAD_REQUEST).json({
-        message: 'Please provide all required fields',
-        code: 'MISSING_FIELDS',
+      res.status(HttpStatusCode.CREATED).json(response.user);
+    } catch (error: any) {
+      console.error("Error in signup:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
       });
-      return;
     }
-
-    const result = await this._authService.loginUser({ emailOrPhone, password });
-
-    res.cookie('thinklet_refreshToken', result.refreshToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: parseInt(process.env.MAX_AGE || '604800000'),
-    });
-
-    res.cookie('thinklet_accessToken', result.accessToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: parseInt(process.env.MAX_AGE || '604800000'),
-    });
-
-    res.status(HttpStatusCode.OK).json({ message: result.message, user: result.user });
-  } catch (error: any) {
-    console.error('Error in login:', error);
-    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: error.message || MESSAGES.server.serverError,
-      code: error.code || 'SERVER_ERROR',
-    });
   }
-};
 
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { emailOrPhone, password } = req.body;
 
-async logout(req: Request, res: Response): Promise<void> {
+      if (!emailOrPhone || !password) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          message: "Please provide all required fields",
+          code: "MISSING_FIELDS",
+        });
+        return;
+      }
+
+      const result = await this._authService.loginUser({
+        emailOrPhone,
+        password,
+      });
+
+      res.cookie("thinklet_refreshToken", result.refreshToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+      });
+
+      res.cookie("thinklet_accessToken", result.accessToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+      });
+
+      res
+        .status(HttpStatusCode.OK)
+        .json({ message: result.message, user: result.user });
+    } catch (error: any) {
+      console.error("Error in login:", error);
+      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: error.message || MESSAGES.server.serverError,
+        code: error.code || "SERVER_ERROR",
+      });
+    }
+  }
+
+  async logout(req: Request, res: Response): Promise<void> {
     try {
       console.log("log out ............ ctrl....");
       res.clearCookie("thinklet_refreshToken", {
@@ -110,20 +118,13 @@ async logout(req: Request, res: Response): Promise<void> {
         secure: true,
       });
 
-
-      res
-        .status(HttpStatusCode.OK)
-        .json({ message:"logout successfully"});
+      res.status(HttpStatusCode.OK).json({ message: "logout successfully" });
     } catch (error) {
       console.log(error);
     }
+  }
 
-    
-  };
-
-
-
- async accessToken(req: Request, res: Response): Promise<void>  {
+  async accessToken(req: Request, res: Response): Promise<void> {
     try {
       const { thinklet_refreshToken } = req.cookies;
 
@@ -134,7 +135,9 @@ async logout(req: Request, res: Response): Promise<void> {
         return;
       }
 
-      const result = await this._authService.getAccessToken(thinklet_refreshToken);
+      const result = await this._authService.getAccessToken(
+        thinklet_refreshToken
+      );
 
       console.log("result from ctrl is ...", result);
 
@@ -164,9 +167,4 @@ async logout(req: Request, res: Response): Promise<void> {
         .json({ message: MESSAGES.server.serverError });
     }
   }
-
-
-
-
-
 }
