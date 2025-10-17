@@ -17,4 +17,5 @@ interface IProfileData {
 export default interface IProfileService {
     updateProfileImageService(userId: string, profile: IProfile | undefined): Promise<any>
     updateProfileService(profileData: IProfileData): Promise<any>
+    changePasswordService(userId: string, oldPassword: string, newPassword: string, confirmPassword:string): Promise<any>
 }

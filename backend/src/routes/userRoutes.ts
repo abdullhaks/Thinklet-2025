@@ -17,6 +17,7 @@ const profileController = container.get<IProfileController>("IProfileController"
 
 userRouter.post('/signup',(req,res)=>authController.signup(req,res));
 userRouter.post('/login',(req,res)=>authController.login(req,res));
+userRouter.post("/changePassword",verifyAccessTokenMidleware("user"),(req,res)=>profileController.changePassword(req,res));
 userRouter.get('/accessToken',(req,res)=>authController.accessToken(req,res));
 userRouter.get('/category',(req,res)=>categoryController.categories(req,res));
 userRouter.post('/articleCreate',verifyAccessTokenMidleware("user"),upload.fields([
