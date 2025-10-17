@@ -13,6 +13,10 @@ import IArticleController from "../controllers/interfaces/user/IArticleControlle
 import AuthController from "../controllers/implementations/user/authController";
 import IAuthController from "../controllers/interfaces/user/IAuthController";
 
+import CategoryController from "../controllers/implementations/user/categoryController";
+import ICategoryController from "../controllers/interfaces/user/ICategoryController";
+
+
 
 
 //services
@@ -21,6 +25,13 @@ import IArticleService from "../services/interfaces/user/IArticleService";
 
 import AuthService from "../services/implementations/user/authService";
 import IAuthService from "../services/interfaces/user/IAuthService";
+
+
+import CategoryService from "../services/implementations/user/categoryService";
+import ICategoryService from "../services/interfaces/user/ICategoryService";
+
+
+
 
 //repositories
 import ArticleRepository from "../repositories/implementations/articleRepository";
@@ -38,35 +49,10 @@ const container = new Container();
 
 //model binding
 
-if(Article){
 container.bind("articleModel").toConstantValue(Article);
-}else{
-  console.log("article model error");
-  
-}
-
-if(Category){
 container.bind("categoryModel").toConstantValue(Category);
-
-}else{
-  console.log("Category model error");
-  
-}
-
-if(User){
 container.bind("userModel").toConstantValue(User);
-
-}else{
-  console.log("User model error");
-  
-}
-
-if(Interaction){
 container.bind("interactionModel").toConstantValue(Interaction);
-}else{
-  console.log("Interaction model error");
-  
-}
 
 
 
@@ -81,20 +67,16 @@ container.bind<ICategoryRepository>("ICategoryRepository").to(CategoryRepository
 
 //service binding
 
-if(ArticleService){
-console.log("service connected.....")
-container.bind<IArticleService>("IArticleService").to(ArticleService)
-
-};
+container.bind<IArticleService>("IArticleService").to(ArticleService);
 container.bind<IAuthService>("IAuthService").to(AuthService);
-
+container.bind<ICategoryService>("ICategoryService").to(CategoryService);
 
 
 
 //controller binding
 container.bind<IArticleController>("IArticleController").to(ArticleController);
 container.bind<IAuthController>("IAuthController").to(AuthController);
-
+container.bind<ICategoryController>("ICategoryController").to(CategoryController);
 
 
 

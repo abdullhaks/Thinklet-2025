@@ -1,23 +1,23 @@
 import express from "express"
-import { categories } from "../controllers/implementations/user/categoryController";
-
 import { upload } from "../helpers/uploadS3";
 import { updateProfileController, updateProfileImageController } from "../controllers/implementations/user/profileController";
 import { verifyAccessTokenMidleware } from "../middlewares.ts/checkAccessToken";
 import container from "../config/inversify"
 import IArticleController from "../controllers/interfaces/user/IArticleController";
 import IAuthController from "../controllers/interfaces/user/IAuthController";
+import ICategoryController from "../controllers/interfaces/user/ICategoryController";
 
 const userRouter = express.Router();
 
 const articleController = container.get<IArticleController>("IArticleController");
-const authController = container.get<IAuthController>("IAuthController")
+const authController = container.get<IAuthController>("IAuthController");
+const categoryController = container.get<ICategoryController>("ICategoryController");
 
 
 userRouter.post('/signup',(req,res)=>authController.signup(req,res));
 userRouter.post('/login',(req,res)=>authController.login(req,res));
 userRouter.get('/accessToken',(req,res)=>authController.accessToken(req,res));
-userRouter.get('/category',categories);
+userRouter.get('/category',(req,res)=>categoryController.categories(req,res));
 userRouter.post('/articleCreate',verifyAccessTokenMidleware("user"),upload.fields([
     { name: "thumbnail", maxCount: 1 },
   ]),(req,res)=>articleController.createArticle(req,res));
