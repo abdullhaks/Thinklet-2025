@@ -346,7 +346,58 @@ export default class ArticleService implements IArticleService {
         code: "FETCH_ARTICLES_ERROR",
       };
     }
+  };
+
+
+async getSearchedArticlesService(
+  query: string,
+  limit: number,
+  articleSet: number,
+  userId: string
+): Promise<{ articles: ArticleResponseDTO[] }> {
+  try {
+    if (!query.trim()) {
+      return { articles: [] };
+    }
+
+    const skip = (articleSet - 1) * limit;
+
+
+    const searchRegex = new RegExp(query.trim(), 'i'); 
+    const articles = await this._articleRepository.findAll(
+      {
+        $or: [
+          { title: { $regex: searchRegex } },
+          { tags: { $elemMatch: { $regex: searchRegex } } },
+          // { content: { $regex: searchRegex } }, 
+        ],
+      },
+      { sort: { createdAt: -1 }, limit: limit, skip: skip }
+    );
+
+    console.log("searched articles are.............................", articles);
+
+    const formattedArticles = await Promise.all(
+      articles.map(async (article) => {
+        return await this.getArticleResponse(article._id.toString(), userId);
+      })
+    );
+
+    console.log(
+      "formatted searched articles are.............................",
+      formattedArticles
+    );
+
+    return { articles: formattedArticles };
+  } catch (error: any) {
+    console.error("Error in getSearchedArticlesService:", error);
+    throw {
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      message: error.message || "Failed to fetch searched articles",
+      code: "FETCH_ARTICLES_ERROR",
+    };
   }
+}
 
   async getMyArticleService(
     userId: string

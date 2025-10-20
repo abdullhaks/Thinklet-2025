@@ -26,6 +26,13 @@ export default interface IArticleService {
     articleData: articleUpdateRequestDTO
   ): Promise<{ article: ArticleResponseDTO }>;
 
+  getSearchedArticlesService(
+    query: string,
+    limit: number,
+    articleSet: number,
+    userId: string
+  ): Promise<{ articles: ArticleResponseDTO[] }>;
+
   getPreferenceArticlesService(
     preferences: IPreference[],
     limit: number,

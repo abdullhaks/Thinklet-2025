@@ -16,6 +16,7 @@ export const ROUTES = {
     updateProfileImage: "/user/updateProfileImage",
     articleUpdate: "/user/articleUpdate",
     changePassword: "/user/changePassword",
+    searchArticles: "/user/searchArticles",
   },
 
   admin: {},

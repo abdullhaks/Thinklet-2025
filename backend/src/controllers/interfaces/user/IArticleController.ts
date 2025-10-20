@@ -4,6 +4,7 @@ export default interface IArticleController {
   createArticle(req: Request, res: Response): Promise<void>;
   updateArticleController(req: any, res: any): Promise<void>;
   getPreferenceArticlesController(req: Request, res: Response): Promise<void>;
+  getSearchedArticlesController(req: Request, res: Response): Promise<void>;
   getMyArticleController(req: Request, res: Response): Promise<void>;
   deleteArticleController(req: Request, res: Response): Promise<void>;
   getArticleController(req: Request, res: Response): Promise<void>;

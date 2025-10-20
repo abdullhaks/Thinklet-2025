@@ -70,6 +70,13 @@ userRouter.get(
   verifyAccessTokenMidleware("user"),
   (req, res) => articleController.getPreferenceArticlesController(req, res)
 );
+
+userRouter.get(
+  "/searchArticles",
+  verifyAccessTokenMidleware("user"),
+  (req, res) => articleController.getSearchedArticlesController(req, res)
+);
+
 userRouter.post(
   "/likeArticle",
   verifyAccessTokenMidleware("user"),

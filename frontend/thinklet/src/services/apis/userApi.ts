@@ -159,6 +159,34 @@ export const getPreferenceArticles = async (
   }
 };
 
+
+
+export const getSearchedArticles = async (
+  query: string,
+  limit: number,
+  articleSet: number,
+  userId: string
+) => {
+  try {
+    const response = await userInstance.get(ROUTES.user.searchArticles, {
+      params: {
+        query,
+        limit,
+        articleSet,
+        userId,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error in fetching searched articles:", error);
+    throw {
+      message:
+        error.response?.data?.message || "Failed to fetch searched articles",
+      code: error.response?.data?.code || "SERVER_ERROR",
+    };
+  }
+};
+
 export const getMyArticles = async (
   // limit: number,
   // articleSet: number,

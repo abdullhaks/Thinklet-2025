@@ -1,4 +1,4 @@
-// src/components/Navbar.tsx
+// src/components/Navbar.tsx (updated)
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, User, LogOut, Plus, Edit } from "lucide-react";
@@ -15,9 +15,13 @@ interface RootState {
   };
 }
 
-export const Navbar = () => {
+interface NavbarProps {
+  searchQuery: string | number | readonly string[] | undefined
+  setSearchQuery: ((query: string) => void) | null;
+}
+
+export const Navbar = ({ searchQuery, setSearchQuery }: NavbarProps) => { // Receive props
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const user = useSelector((state: RootState) => state.user.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -56,7 +60,7 @@ export const Navbar = () => {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery?.(e.target.value)}
                   placeholder="Search articles..."
                   className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 bg-purple-50 border border-purple-100 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition-all text-sm sm:text-base"
                 />

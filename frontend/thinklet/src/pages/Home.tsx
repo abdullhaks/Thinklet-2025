@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { GridBackground } from "../components/gridBackground";
 import { Navbar } from "../components/Navbar";
@@ -7,8 +7,9 @@ import { ArticleCard } from "../components/ArticleCard";
 import { type ArticleResponseDTO } from "../interfaces/article";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store/store";
-import { getPreferenceArticles } from "../services/apis/userApi";
+import { getPreferenceArticles, getSearchedArticles } from "../services/apis/userApi";
 import { message } from "antd";
+import { debounce } from "lodash";
 
 export const Home = () => {
   const limit = 3;
@@ -16,52 +17,96 @@ export const Home = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [articles, setArticles] = useState<ArticleResponseDTO[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const user = useSelector((state: RootState) => state.user.user);
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      // Log user and preferences for debugging
-      console.log("User:", user);
-      console.log("Preferences:", user?.preferences);
-
-      if (!user?._id || !user?.preferences || user.preferences.length === 0) {
-        console.log("No user ID or preferences, skipping fetch");
-        setArticles([]);
-        setHasMore(false);
-        return;
-      }
-      message.loading("fetching articles..");
+  // Debounced fetch function for search
+  const debouncedFetchSearchArticles = useCallback(
+    debounce(async (query: string, set: number, userId: string) => {
+      if (!query.trim()) return; // Skip if query is empty
       setLoading(true);
       try {
-        console.log("Fetching articles with preferences:", user.preferences);
-        const response = await getPreferenceArticles(
-          user.preferences,
-          limit,
-          articleSet,
-          user._id
-        );
-
-        console.log("API Response:", response);
+        console.log("Fetching searched articles with query:", query);
+        const response = await getSearchedArticles(query, limit, set, userId);
+        console.log("Search API Response:", response);
         if (response.articles.length === 0) {
           setHasMore(false);
         } else {
           setArticles((prev) =>
-            articleSet === 1
-              ? response.articles
-              : [...prev, ...response.articles]
+            set === 1 ? response.articles : [...prev, ...response.articles]
           );
           setHasMore(response.articles.length === limit);
         }
       } catch (error: any) {
-        console.error("Error fetching preference articles:", error);
+        console.error("Error fetching searched articles:", error);
         setHasMore(false);
       } finally {
         setLoading(false);
       }
+    }, 500), // 500ms debounce delay
+    [limit] // Dependency for debounce
+  );
+
+  // Fetch articles (preference or search-based)
+  useEffect(() => {
+    const fetchArticles = async () => {
+      if (!user?._id) {
+        console.log("No user ID, skipping fetch");
+        setArticles([]);
+        setHasMore(false);
+        return;
+      }
+
+      if (searchQuery.trim()) {
+        // Trigger debounced search
+        debouncedFetchSearchArticles(searchQuery, articleSet, user._id);
+      } else {
+        // Fetch preference-based articles
+        if (!user?.preferences || user.preferences.length === 0) {
+  
+          setArticles([]);
+          setHasMore(false);
+          return;
+        }
+        setLoading(true);
+        message.loading("Fetching articles...");
+        try {
+          console.log("Fetching articles with preferences:", user.preferences);
+          const response = await getPreferenceArticles(
+            user.preferences,
+            limit,
+            articleSet,
+            user._id
+          );
+          console.log("Preference API Response:", response);
+          if (response.articles.length === 0) {
+            setHasMore(false);
+          } else {
+            setArticles((prev) =>
+              articleSet === 1
+                ? response.articles
+                : [...prev, ...response.articles]
+            );
+            setHasMore(response.articles.length === limit);
+          }
+        } catch (error: any) {
+          console.error("Error fetching preference articles:", error);
+          setHasMore(false);
+        } finally {
+          setLoading(false);
+        }
+      }
     };
 
     fetchArticles();
-  }, [user?._id, user?.preferences, articleSet]);
+  }, [user?._id, user?.preferences, articleSet, searchQuery, debouncedFetchSearchArticles]);
+
+  // Reset pagination and articles when searchQuery changes
+  useEffect(() => {
+    setArticles([]);
+    setArticleSet(1);
+    setHasMore(true);
+  }, [searchQuery]);
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {
@@ -72,7 +117,7 @@ export const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
       <GridBackground />
-      <Navbar />
+      <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 z-20">
         {/* Welcome Section */}
         <motion.div
@@ -127,7 +172,9 @@ export const Home = () => {
               No articles available
             </h3>
             <p className="text-gray-600">
-              Check back later or adjust your preferences.
+              {searchQuery.trim()
+                ? "No results found for your search. Try adjusting your query."
+                : "Check back later or adjust your preferences."}
             </p>
           </div>
         ) : (

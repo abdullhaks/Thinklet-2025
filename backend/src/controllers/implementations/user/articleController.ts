@@ -188,6 +188,59 @@ export default class ArticleController implements IArticleController {
     }
   }
 
+
+
+async getSearchedArticlesController(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const { query, userId, limit = 5, articleSet = 1 } = req.query;
+
+    if (!userId || !query || typeof query !== 'string' || query.trim() === '') {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: "Valid search query must be provided",
+        code: "INVALID_QUERY",
+      };
+    }
+
+    const parsedLimit = parseInt(limit as string, 10);
+    const parsedArticleSet = parseInt(articleSet as string, 10);
+
+    if (
+      isNaN(parsedLimit) ||
+      isNaN(parsedArticleSet) ||
+      parsedLimit <= 0 ||
+      parsedArticleSet <= 0
+    ) {
+      throw {
+        status: HttpStatusCode.BAD_REQUEST,
+        message: "Invalid limit or articleSet",
+        code: "INVALID_PAGINATION",
+      };
+    }
+
+    const response = await this._articleService.getSearchedArticlesService(
+      query.toString().trim(),
+      parsedLimit,
+      parsedArticleSet,
+      userId.toString()
+    );
+
+    res.status(HttpStatusCode.OK).json({
+      message: MESSAGES.user.articlesFetched,
+      articles: response.articles,
+    });
+  } catch (error: any) {
+    console.error("Error in getSearchedArticlesController:", error);
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || "SERVER_ERROR",
+    });
+  }
+}
+
   async getMyArticleController(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.query;
