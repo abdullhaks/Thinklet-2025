@@ -18,7 +18,7 @@ export default class CategoryController implements ICategoryController {
 
       console.log("user is ", categories);
 
-      res.status(HttpStatusCode.CREATED).json(categories);
+      res.status(HttpStatusCode.OK).json(categories);
     } catch (error: any) {
       console.error("Error in signup:", error);
       res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({

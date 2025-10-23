@@ -33,9 +33,9 @@ export const loginUser = async (userData: any) => {
     const response = await userInstance.post(ROUTES.user.login, userData);
     console.log("Login response:", response.data);
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error logging in user:", error);
-    throw error;
+    throw error.response.data;
   }
 };
 

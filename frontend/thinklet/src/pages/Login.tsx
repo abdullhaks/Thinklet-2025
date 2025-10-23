@@ -96,8 +96,8 @@ export const Login = () => {
       if (errorMessage.includes("Invalid credentials")) {
         setErrors((prev) => ({
           ...prev,
-          emailOrPhone: "Invalid email/phone or password",
-          password: "Invalid email/phone or password",
+          emailOrPhone: "Invalid email/phone ",
+          password: "Invalid password",
         }));
       } else if (errorMessage.includes("Please provide all required fields")) {
         setErrors((prev) => ({
@@ -107,9 +107,9 @@ export const Login = () => {
             : "",
           password: !formData.password ? "Password is required" : "",
         }));
-      } else {
+      } 
         message.error(errorMessage);
-      }
+    
     } finally {
       setIsLoading(false);
     }

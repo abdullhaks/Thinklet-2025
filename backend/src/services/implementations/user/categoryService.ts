@@ -14,7 +14,7 @@ export default class CategoryService implements ICategoryService {
     console.log("categories...: ", categories);
 
     return {
-      message: "Signup successful",
+      message: "Categories fetched",
       categories: categories,
     };
   }
