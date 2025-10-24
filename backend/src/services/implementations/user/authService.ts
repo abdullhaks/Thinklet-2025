@@ -65,8 +65,9 @@ export default class AuthService implements IAuthService {
     userData.password = await bcrypt.hash(userData.password, salt);
 
     const response = await this._userRepository.create(userData);
+  
 
-    const { password, ...rest } = response;
+    const { password, ...rest } = response.toObject();
 
     const accessToken = generateAccessToken({
       id: response._id.toString(),
@@ -77,8 +78,9 @@ export default class AuthService implements IAuthService {
       role: "user",
     });
 
+
     let preferences = await Promise.all(
-      rest.preferences.map(async (prefId) => {
+      rest.preferences.map(async (prefId:string) => {
         let prefData = await this._categoryRepository.findOne({ _id: prefId });
         return { _id: prefData?._id, name: prefData?.name };
       })

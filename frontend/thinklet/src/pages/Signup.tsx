@@ -62,11 +62,13 @@ export const Signup = () => {
       case "firstName":
         if (!value.trim()) {
           newErrors.firstName = "First name is required";
-        } else if (value.trim().length < 2) {
+        } else if (value.trim().length < 4) {
           newErrors.firstName = "First name must be at least 2 characters";
         } else if (value.trim().length > 50) {
           newErrors.firstName = "First name must be less than 50 characters";
-        } else {
+        }else if (    /[^a-zA-Z'-\s]/.test(value.trim())) {
+          newErrors.firstName = "First name contains invalid characters";
+        }else {
           newErrors.firstName = "";
         }
         break;
@@ -81,12 +83,14 @@ export const Signup = () => {
           newErrors.lastName = "";
         }
         break;
-      case "phone":
-        const phoneRegex = /^[0-9]{10}$/;
+          case "phone":
+        // Accepts optional +91 or 0 prefix, and then 10 digits starting with 6–9
+        const phoneRegex = /^(?:\+91|0)?[6-9]\d{9}$/;
+
         if (!value.trim()) {
           newErrors.phone = "Phone number is required";
         } else if (!phoneRegex.test(value.trim())) {
-          newErrors.phone = "Enter a valid 10-digit phone number";
+          newErrors.phone = "Enter a valid 10-digit Indian phone number";
         } else {
           newErrors.phone = "";
         }
