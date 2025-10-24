@@ -301,12 +301,28 @@ export default class ArticleService implements IArticleService {
   }
 
   async getPreferenceArticlesService(
+    all: boolean,
     preferences: IPreference[],
     limit: number,
     articleSet: number,
     userId: string
   ): Promise<{ articles: ArticleResponseDTO[] }> {
     try {
+
+      let articles;
+
+      console.log("all value in service.............................", all);
+      if(all){
+
+        console.log("Fetching all articles as all is true.............................");
+        const skip = (articleSet - 1) * limit;
+
+          articles = await this._articleRepository.findAll(
+          {},
+          { sort: { createdAt: -1 }, limit: limit, skip: skip }
+        );
+      }else{
+
       if (!preferences || preferences.length === 0) {
         return { articles: [] };
       }
@@ -314,7 +330,7 @@ export default class ArticleService implements IArticleService {
       const preferenceIds = preferences.map((pref) => pref._id);
       const skip = (articleSet - 1) * limit;
 
-      const articles = await this._articleRepository.findAll(
+       articles = await this._articleRepository.findAll(
         {
           $or: [
             { category: { $in: preferenceIds } },
@@ -325,6 +341,8 @@ export default class ArticleService implements IArticleService {
       );
 
       console.log("articles are.............................", articles);
+
+    }
 
       const formattedArticles = await Promise.all(
         articles.map(async (article) => {

@@ -124,17 +124,8 @@ export default class ArticleController implements IArticleController {
     res: Response
   ): Promise<void> {
     try {
-      const { preferences, userId, limit = 5, articleSet = 1 } = req.query;
-      console.log(
-        "ArticleController constructor - _articleService:",
-        !!this._articleService
-      );
+      const { all, preferences, userId, limit = 5, articleSet = 1 } = req.query;
 
-      console.log("preference...", preferences);
-      console.log(
-        "userId...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        userId
-      );
 
       // Validate preferences
       if (
@@ -169,6 +160,7 @@ export default class ArticleController implements IArticleController {
       }
 
       const response = await this._articleService.getPreferenceArticlesService(
+        all === 'true',
         parsedPreferences,
         parsedLimit,
         parsedArticleSet,

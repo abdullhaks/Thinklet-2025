@@ -39,7 +39,7 @@ const profileSchema = z.object({
   preferences: z
     .array(z.string())
     .min(3, "Select at least 3 interests")
-    .max(5, "Select at most 5 interests"),
+    .max(15, "Select at most 15 interests"),
 });
 
 export const Profile = () => {

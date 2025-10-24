@@ -94,11 +94,11 @@ export const Login = () => {
       console.error("Login error:", error);
       const errorMessage = error.message || "Failed to log in";
       if (errorMessage.includes("Invalid credentials")) {
-        setErrors((prev) => ({
-          ...prev,
-          emailOrPhone: "Invalid email/phone ",
-          password: "Invalid password",
-        }));
+        // setErrors((prev) => ({
+        //   ...prev,
+        //   emailOrPhone: "Invalid email/phone ",
+        //   password: "Invalid password",
+        // }));
       } else if (errorMessage.includes("Please provide all required fields")) {
         setErrors((prev) => ({
           ...prev,

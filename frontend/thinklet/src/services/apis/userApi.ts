@@ -134,6 +134,7 @@ export const updateArticle = async (articleData: FormData) => {
 };
 
 export const getPreferenceArticles = async (
+  all:boolean,
   preferences: IPreference[],
   limit: number,
   articleSet: number,
@@ -142,6 +143,7 @@ export const getPreferenceArticles = async (
   try {
     const response = await userInstance.get(ROUTES.user.preferenceArticles, {
       params: {
+        all,
         preferences: JSON.stringify(preferences),
         limit,
         articleSet,

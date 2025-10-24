@@ -1,7 +1,6 @@
 // src/pages/Home.tsx
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { GridBackground } from "../components/gridBackground";
 import { Navbar } from "../components/Navbar";
 import { ArticleCard } from "../components/ArticleCard";
 import { type ArticleResponseDTO } from "../interfaces/article";
@@ -19,6 +18,7 @@ export const Home = () => {
   const [articles, setArticles] = useState<ArticleResponseDTO[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const user = useSelector((state: RootState) => state.user.user);
+  const [all , setAll] = useState(false);
 
   // Debounced fetch function for search
   const debouncedFetchSearchArticles = useCallback(
@@ -73,6 +73,7 @@ export const Home = () => {
         try {
           console.log("Fetching articles with preferences:", user.preferences);
           const response = await getPreferenceArticles(
+            all,
             user.preferences,
             limit,
             articleSet,
@@ -99,7 +100,7 @@ export const Home = () => {
     };
 
     fetchArticles();
-  }, [user?._id, user?.preferences, articleSet, searchQuery, debouncedFetchSearchArticles]);
+  }, [user?._id, user?.preferences, articleSet, all, searchQuery, debouncedFetchSearchArticles]);
 
   // Reset pagination and articles when searchQuery changes
   useEffect(() => {
@@ -116,9 +117,10 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      <GridBackground />
+      
+   
       <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 z-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-4 py-4 sm:py-4 lg:py-4 z-40">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -132,9 +134,17 @@ export const Home = () => {
             </span>
             !
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 pb-2">
             Discover articles based on your interests
           </p>
+
+
+          <span
+          className="z-50 px-3 py-1 mt-6 sm:px-4 sm:py-1.5 bg-gradient-to-r from-red-500 to-indigo-600 text-white shadow-blue-950/80 text-xs sm:text-sm font-semibold rounded-full shadow-md hover:px-5 hover:py-2 cursor-pointer"
+          onClick={() =>{ setArticleSet(1);  setArticles([]);   setAll(!all) }}
+        >
+          {all ? "Show Preference Based Articles": "Showing All Articles" }
+          </span>
         </motion.div>
 
         {/* Preferences Tags */}

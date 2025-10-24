@@ -34,6 +34,7 @@ export default interface IArticleService {
   ): Promise<{ articles: ArticleResponseDTO[] }>;
 
   getPreferenceArticlesService(
+    all: boolean,
     preferences: IPreference[],
     limit: number,
     articleSet: number,
