@@ -103,7 +103,7 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
     const fetchArticle = async () => {
       if (editMode && articleId) {
         try {
-          const response = await getArticle(articleId, user?._id);
+          const response = await getArticle(articleId);
           console.log("Article from frontend:", response);
           const article = response.article;
           setArticleForEdit(article);
