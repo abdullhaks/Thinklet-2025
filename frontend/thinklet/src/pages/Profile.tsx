@@ -262,7 +262,6 @@ export const Profile = () => {
                     accept="image/*"
                     onChange={handleImageSelect}
                     className="hidden"
-                    capture='user'
                   />
                 </label>
                 {Object.values(errors).map((item, idx) => (
