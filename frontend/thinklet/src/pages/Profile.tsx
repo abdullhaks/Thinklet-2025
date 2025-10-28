@@ -92,20 +92,70 @@ export const Profile = () => {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+    
       if (!file.type.startsWith("image/")) {
         setErrors((prev) => ({ ...prev, profilePic: "File must be an image" }));
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
+
+
+      const allowedExt = /\.(jpe?g|png|gif|bmp|webp|svg|HEIC)$/i;
+      if (!allowedExt.test(file.name)) {
+        setErrors((prev) => ({ ...prev, profilePic: "Unsupported image file extension" }));
+        return;
+      }
+
+      // Size check (keep 5MB limit)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
         setErrors((prev) => ({
           ...prev,
           profilePic: "Image size must be less than 5MB",
         }));
         return;
       }
-      setSelectedImage(file);
-      setPreviewImage(URL.createObjectURL(file));
-      setErrors((prev) => ({ ...prev, profilePic: "" }));
+
+      // Validate magic bytes to reduce risk of fake MIME types
+      const reader = new FileReader();
+      reader.onload = () => {
+        const arr = new Uint8Array(reader.result as ArrayBuffer).subarray(0, 12);
+        const hex = Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join(" ");
+
+        const isImageSignature =
+          hex.startsWith("ff d8 ff") || // JPEG
+          hex.startsWith("89 50 4e 47") || // PNG
+          hex.startsWith("47 49 46 38") || // GIF
+          hex.startsWith("42 4d") || // BMP
+          (hex.includes("52 49 46 46") && hex.includes("57 45 42 50")); // WEBP (RIFF + WEBP)
+
+        if (!isImageSignature) {
+          setErrors((prev) => ({ ...prev, profilePic: "File content does not look like a valid image" }));
+          return;
+        }
+
+        // Final sanity check: try loading the blob into an Image element (catches corrupt files)
+        const img = new Image();
+        img.onload = () => {
+          setSelectedImage(file);
+          setPreviewImage(URL.createObjectURL(file));
+          setErrors((prev) => ({ ...prev, profilePic: "" }));
+        };
+        img.onerror = () => {
+          setErrors((prev) => ({ ...prev, profilePic: "Unable to parse image file" }));
+        };
+        img.src = URL.createObjectURL(file);
+      };
+      reader.onerror = () => {
+        setErrors((prev) => ({ ...prev, profilePic: "Unable to read file" }));
+      };
+      reader.readAsArrayBuffer(file.slice(0, 12));
+
+    
+      return;
+    
+      // setSelectedImage(file);
+      // setPreviewImage(URL.createObjectURL(file));
+      // setErrors((prev) => ({ ...prev, profilePic: "" }));
     }
   };
 
@@ -212,6 +262,7 @@ export const Profile = () => {
                     accept="image/*"
                     onChange={handleImageSelect}
                     className="hidden"
+                    capture='user'
                   />
                 </label>
                 {Object.values(errors).map((item, idx) => (

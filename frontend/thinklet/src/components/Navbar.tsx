@@ -63,6 +63,7 @@ export const Navbar = ({ searchQuery, setSearchQuery }: NavbarProps) => { // Rec
                   onChange={(e) => setSearchQuery?.(e.target.value)}
                   placeholder="Search articles..."
                   className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 bg-purple-50 border border-purple-100 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition-all text-sm sm:text-base"
+                  x-webkit-speech                
                 />
               </div>
             </div>
