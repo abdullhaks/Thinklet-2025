@@ -1,6 +1,8 @@
 import { inject, injectable } from "inversify";
 import IProfileController from "../../interfaces/user/IProfileController";
 import IProfileService from "../../../services/interfaces/user/IProfileService";
+import { HttpStatusCode } from "../../../utils/enum";
+import { verifyRefreshToken } from "../../../utils/jwt";
 
 interface MulterFile {
   fieldname: string;
@@ -23,14 +25,36 @@ export default class ProfileController implements IProfileController {
 
   async changePassword(req: any, res: any): Promise<void> {
     try {
-      const { userId, oldPassword, password, confirmPassword } = req.body;
-      if (!userId || !oldPassword || !password || !confirmPassword) {
+      const { oldPassword, password, confirmPassword } = req.body;
+      if (!oldPassword || !password || !confirmPassword) {
         return res
           .status(400)
           .json({ message: "Missing required fields", code: "MISSING_FIELDS" });
+      };
+
+
+
+      const { thinklet_refreshToken } = req.cookies;
+      
+            if (!thinklet_refreshToken) {
+              res
+                .status(HttpStatusCode.FORBIDDEN)
+                .json({ msg: "refresh token not found" });
+              return;
+            }
+
+      const authDetails = verifyRefreshToken(thinklet_refreshToken);
+
+      if(!authDetails) {
+        res.status(HttpStatusCode.FORBIDDEN)
+            .json({ msg: "refresh token not found" });
+            return;
       }
+
+      console.log('authDetails is ...',authDetails);
+
       await this._profileService.changePasswordService(
-        userId,
+        authDetails.id,
         oldPassword,
         password,
         confirmPassword

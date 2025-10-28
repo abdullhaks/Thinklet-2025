@@ -41,7 +41,7 @@ export const ArticleView = () => {
       }
 
       try {
-        const response = await getArticle(articleId, user?._id);
+        const response = await getArticle(articleId);
         console.log("Article from frontend:", response);
         setArticle(response.article);
         setLiked(response.article.userInteraction.liked);
@@ -64,7 +64,7 @@ export const ArticleView = () => {
       if (!articleId) return;
 
       try {
-        const response = await likeArticle(articleId, user._id);
+        const response = await likeArticle(articleId);
         setLiked(response.liked);
         setDisliked(false); // Ensure mutually exclusive
         setArticle((prev) =>
@@ -99,7 +99,7 @@ export const ArticleView = () => {
       if (!articleId) return;
 
       try {
-        const response = await dislikeArticle(articleId, user._id);
+        const response = await dislikeArticle(articleId);
         setDisliked(response.disliked);
         setLiked(false); // Ensure mutually exclusive
         setArticle((prev) =>

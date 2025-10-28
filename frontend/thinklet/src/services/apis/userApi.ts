@@ -78,13 +78,12 @@ export const logoutUser = async () => {
   }
 };
 
-export const getArticle = async (articleId: string, userId?: string) => {
+export const getArticle = async (articleId: string) => {
   try {
-    console.log("In getArticle API with:", { articleId, userId });
+    console.log("In getArticle API with:", { articleId });
     const response = await userInstance.get(ROUTES.user.article, {
       params: {
-        articleId,
-        userId,
+        articleId
       },
     });
 
@@ -259,12 +258,11 @@ export const updateProfileImage = async (imageData: FormData) => {
   }
 };
 
-export const likeArticle = async (articleId: string, userId: string) => {
+export const likeArticle = async (articleId: string) => {
   try {
-    console.log("In likeArticle API with:", { articleId, userId });
+    console.log("In likeArticle API with:", { articleId});
     const response = await userInstance.post(ROUTES.user.likeArticle, {
-      articleId,
-      userId,
+      articleId
     });
     return response.data;
   } catch (error: any) {
@@ -276,12 +274,11 @@ export const likeArticle = async (articleId: string, userId: string) => {
   }
 };
 
-export const dislikeArticle = async (articleId: string, userId: string) => {
+export const dislikeArticle = async (articleId: string) => {
   try {
-    console.log("In dislikeArticle API with:", { articleId, userId });
+    console.log("In dislikeArticle API with:", { articleId });
     const response = await userInstance.post(ROUTES.user.dislikeArticle, {
-      articleId,
-      userId,
+      articleId
     });
     return response.data;
   } catch (error: any) {

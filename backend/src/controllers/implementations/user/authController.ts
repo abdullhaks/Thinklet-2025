@@ -130,7 +130,7 @@ export default class AuthController implements IAuthController {
 
       if (!thinklet_refreshToken) {
         res
-          .status(HttpStatusCode.UNAUTHORIZED)
+          .status(HttpStatusCode.FORBIDDEN)
           .json({ msg: "refresh token not found" });
         return;
       }

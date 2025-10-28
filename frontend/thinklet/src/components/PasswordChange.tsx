@@ -3,8 +3,7 @@ import { FormInput } from "./FormInput";
 import { X } from "lucide-react";
 import { changePassword } from "../services/apis/userApi";
 import { message } from "antd";
-import { useSelector } from "react-redux";
-import type { RootState } from "../redux/store/store";
+
 
 function PasswordChange({
   setPasswordModalOpen,
@@ -13,15 +12,12 @@ function PasswordChange({
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const user = useSelector((state: RootState) => state.user.user);
 
   const [formData, setFormData] = useState<{
-    userId: string;
     oldPassword: string;
     password: string;
     confirmPassword: string;
   }>({
-    userId: user?._id || "",
     oldPassword: "",
     password: "",
     confirmPassword: "",

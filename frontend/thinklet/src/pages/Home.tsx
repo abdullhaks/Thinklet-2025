@@ -26,9 +26,11 @@ export const Home = () => {
       if (!query.trim()) return; // Skip if query is empty
       setLoading(true);
       try {
+        message.loading("Searching articles...", 0);
         console.log("Fetching searched articles with query:", query);
         const response = await getSearchedArticles(query, limit, set, userId);
         console.log("Search API Response:", response);
+        message.destroy();
         if (response.articles.length === 0) {
           setHasMore(false);
         } else {
@@ -69,8 +71,8 @@ export const Home = () => {
           return;
         }
         setLoading(true);
-        message.loading("Fetching articles...");
         try {
+          message.loading("Fetching articles...", 0);
           console.log("Fetching articles with preferences:", user.preferences);
           const response = await getPreferenceArticles(
             all,
@@ -80,6 +82,7 @@ export const Home = () => {
             user._id
           );
           console.log("Preference API Response:", response);
+          message.destroy();
           if (response.articles.length === 0) {
             setHasMore(false);
           } else {

@@ -5,6 +5,7 @@ import { MESSAGES } from "../../../utils/messages";
 import { IPreference } from "../../../dto/userDto";
 import IArticleController from "../../interfaces/user/IArticleController";
 import IArticleService from "../../../services/interfaces/user/IArticleService";
+import { verifyRefreshToken } from "../../../utils/jwt";
 
 interface MulterFile {
   fieldname: string;
@@ -294,7 +295,18 @@ async getSearchedArticlesController(
 
   async getArticleController(req: Request, res: Response): Promise<void> {
     try {
-      const { articleId, userId } = req.query;
+      const { articleId } = req.query;
+
+      const { thinklet_refreshToken } = req.cookies;
+            
+                  if (!thinklet_refreshToken) {
+                    res
+                      .status(HttpStatusCode.FORBIDDEN)
+                      .json({ msg: "refresh token not found" });
+                    return;
+                  }
+      
+      const authDetails = verifyRefreshToken(thinklet_refreshToken);
 
       if (!articleId || typeof articleId !== "string") {
         throw {
@@ -304,18 +316,11 @@ async getSearchedArticlesController(
         };
       }
 
-      // userId is optional, but if provided, it must be a string
-      if (userId && typeof userId !== "string") {
-        throw {
-          status: HttpStatusCode.BAD_REQUEST,
-          message: "User ID must be a string",
-          code: "INVALID_USER_ID",
-        };
-      }
+     
 
       const response = await this._articleService.getArticleService(
         articleId,
-        userId as string | undefined
+        authDetails?.id as string | undefined
       );
 
       console.log("Article fetched in controller......////:", response);
@@ -332,9 +337,25 @@ async getSearchedArticlesController(
 
   async likeArticleController(req: Request, res: Response): Promise<void> {
     try {
-      const { articleId, userId } = req.body;
+      const { articleId } = req.body;
 
-      if (!articleId || !userId) {
+      const { thinklet_refreshToken } = req.cookies;
+            
+                  if (!thinklet_refreshToken) {
+                    res
+                      .status(HttpStatusCode.FORBIDDEN)
+                      .json({ msg: "refresh token not found" });
+                    return;
+                  }
+      
+      const authDetails = verifyRefreshToken(thinklet_refreshToken);
+      if(!authDetails) {
+        res.status(HttpStatusCode.FORBIDDEN)
+            .json({ msg: "refresh token not found" });
+            return;
+      }
+
+      if (!articleId) {
         throw {
           status: HttpStatusCode.BAD_REQUEST,
           message: "Article ID and user ID are required",
@@ -344,7 +365,7 @@ async getSearchedArticlesController(
 
       const response = await this._articleService.likeArticleService(
         articleId,
-        userId
+        authDetails.id
       );
 
       res.status(HttpStatusCode.OK).json({
@@ -364,9 +385,25 @@ async getSearchedArticlesController(
 
   async dislikeArticleController(req: Request, res: Response): Promise<void> {
     try {
-      const { articleId, userId } = req.body;
+      const { articleId } = req.body;
 
-      if (!articleId || !userId) {
+        const { thinklet_refreshToken } = req.cookies;
+            
+                  if (!thinklet_refreshToken) {
+                    res
+                      .status(HttpStatusCode.FORBIDDEN)
+                      .json({ msg: "refresh token not found" });
+                    return;
+                  }
+      
+      const authDetails = verifyRefreshToken(thinklet_refreshToken);
+      if(!authDetails) {
+        res.status(HttpStatusCode.FORBIDDEN)
+            .json({ msg: "refresh token not found" });
+            return;
+      }
+
+      if (!articleId) {
         throw {
           status: HttpStatusCode.BAD_REQUEST,
           message: "Article ID and user ID are required",
@@ -376,7 +413,7 @@ async getSearchedArticlesController(
 
       const response = await this._articleService.dislikeArticleService(
         articleId,
-        userId
+        authDetails.id
       );
 
       res.status(HttpStatusCode.OK).json({
