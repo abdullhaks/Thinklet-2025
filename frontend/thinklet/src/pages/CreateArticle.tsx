@@ -283,11 +283,15 @@ export const CreateArticle = ({ editMode = false }: CreateArticleProps) => {
           navigate("/articles");
         }
       } else {
+        message.loading("article posting..",0)
         const response = await createArticle(formDataToSend);
+
         if (response) {
+          message.destroy()
           message.success("Article published successfully!");
-          navigate("/articles");
-        }
+          navigate(`/article/${response._id}`);
+        };
+        message.destroy()
       }
     } catch (error: any) {
       console.error("Article operation failed:", error);
