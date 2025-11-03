@@ -8,7 +8,6 @@ import userRouter from "./routes/userRoutes";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -31,19 +30,19 @@ app.use(
   })
 );
 
-app.options("*", cors()); // handle preflight requests
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-  res.send("MyHealth backend running on Vercel...");
+  res.status(200).send("✅ MyHealth backend running on Vercel!");
 });
 
 connectDB();
 
 app.use("/api/user", userRouter);
 
-app.listen(port, () => {
-  console.log(`MyHealth backend running at http://localhost:${port}`);
-});
+// ✅ DO NOT CALL app.listen()
+// Vercel needs a default export instead
+export default app;
