@@ -33,17 +33,17 @@ app.use(
 
 app.options("*", cors()); // handle preflight requests
 
+app.use(express.json());
+app.use(cookieParser());
+
 app.get("/", (req, res) => {
-  res.send("my health is running....");
+  res.send("MyHealth backend running on Vercel...");
 });
 
 connectDB();
 
-app.use(express.json());
-app.use(cookieParser());
-
 app.use("/api/user", userRouter);
 
 app.listen(port, () => {
-  console.log(`MyHealth is running on port 3000 http://localhost:${port}`);
+  console.log(`MyHealth backend running at http://localhost:${port}`);
 });
