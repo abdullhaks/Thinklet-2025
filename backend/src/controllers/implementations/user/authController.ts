@@ -81,13 +81,16 @@ export default class AuthController implements IAuthController {
         httpOnly: true,
         sameSite: "none",
         secure: true,
+        partitioned: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+        
       });
 
       res.cookie("thinklet_accessToken", result.accessToken, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
+        partitioned: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
       });
 
