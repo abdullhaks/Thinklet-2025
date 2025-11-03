@@ -295,17 +295,13 @@ async getSearchedArticlesController(
 
   async getArticleController(req: Request, res: Response): Promise<void> {
     try {
+
+
+      console.log("ia mmm here.......1");
+      
       const { articleId } = req.query;
 
       const { thinklet_refreshToken } = req.cookies;
-            
-                  if (!thinklet_refreshToken) {
-                    res
-                      .status(HttpStatusCode.FORBIDDEN)
-                      .json({ msg: "refresh token not found" });
-                    return;
-                  }
-      
       const authDetails = verifyRefreshToken(thinklet_refreshToken);
 
       if (!articleId || typeof articleId !== "string") {
@@ -315,8 +311,8 @@ async getSearchedArticlesController(
           code: "MISSING_ARTICLE_ID",
         };
       }
+      console.log("ia mmm here.......2");
 
-     
 
       const response = await this._articleService.getArticleService(
         articleId,
