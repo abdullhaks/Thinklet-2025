@@ -10,13 +10,28 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "https://www.thinklet.abdullhakalamban.online",
+  "https://thinklet.abdullhakalamban.online",
+  "http://localhost:5173"
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL as string,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
+app.options("*", cors()); // handle preflight requests
 
 app.get("/", (req, res) => {
   res.send("my health is running....");
