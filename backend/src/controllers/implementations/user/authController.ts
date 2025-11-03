@@ -81,8 +81,9 @@ export default class AuthController implements IAuthController {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        partitioned: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+        partitioned: true,
+      
         
       });
 
@@ -90,8 +91,8 @@ export default class AuthController implements IAuthController {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        partitioned: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+        partitioned: true,
       });
 
       res
@@ -160,6 +161,7 @@ export default class AuthController implements IAuthController {
         sameSite: "none",
         secure: true,
         maxAge: parseInt(process.env.MAX_AGE || "604800000"),
+        partitioned: true,
       });
 
       res.status(HttpStatusCode.OK).json(result);

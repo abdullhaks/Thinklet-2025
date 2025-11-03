@@ -20,6 +20,8 @@ export function verifyAccessTokenMidleware(
       console.log("thinklet_accessToken is..... ", thinklet_accessToken);
 
       token = thinklet_accessToken;
+
+      console.log("token is.....//////////////..................... ", token);
       if (!thinklet_accessToken) {
         res
           .status(HttpStatusCode.FORBIDDEN)
