@@ -117,18 +117,30 @@ export default class AuthService implements IAuthService {
     };
   }
 
-  // === 3. Check for existing user ===
-  const existingUser = await this._userRepository.findOne({
-    email: trimmedEmail,
-  });
+const existingUserByEmail = await this._userRepository.findOne({
+  email: trimmedEmail,
+});
 
-  if (existingUser) {
-    throw {
-      status: HttpStatusCode.CONFLICT,
-      message: 'This email is already registered',
-      code: 'USER_EXISTS',
-    };
-  }
+if (existingUserByEmail) {
+  throw {
+    status: HttpStatusCode.CONFLICT,
+    message: 'This email is already registered',
+    code: 'USER_EXISTS',
+  };
+}
+
+// ADD THIS: Check for existing phone
+const existingUserByPhone = await this._userRepository.findOne({
+  phone: cleanPhone,
+});
+
+if (existingUserByPhone) {
+  throw {
+    status: HttpStatusCode.CONFLICT,
+    message: 'This phone number is already registered',
+    code: 'PHONE_EXISTS',
+  };
+}
 
   // === 4. Validate Preference Categories Exist ===
   const validCategories = await this._categoryRepository.findAll({

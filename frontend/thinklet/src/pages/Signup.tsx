@@ -178,26 +178,43 @@ export const Signup = () => {
       }
     } catch (error: any) {
       console.error("Signup error:", error);
-      const errorCode = error.code || "SERVER_ERROR";
-      switch (errorCode) {
-        case "USER_EXISTS":
-          setErrors((prev) => ({
-            ...prev,
-            email: "This email is already registered",
-          }));
-          break;
-        case "PASSWORD_MISMATCH":
-          setErrors((prev) => ({
-            ...prev,
-            confirmPassword: "Passwords do not match",
-          }));
-          break;
-        case "MISSING_FIELDS":
-          message.error("Please provide all required fields");
-          break;
-        default:
-          message.error(error.message || "Failed to sign up");
-      }
+  const errorCode = error.code || "SERVER_ERROR";
+
+  switch (errorCode) {
+    case "USER_EXISTS":
+      setErrors((prev) => ({
+        ...prev,
+        email: "This email is already registered",
+      }));
+      message.error("This email is already registered");
+      break;
+
+    case "PHONE_EXISTS":
+      setErrors((prev) => ({
+        ...prev,
+        phone: "This phone number is already registered",
+      }));
+      message.error("This phone number is already registered");
+      break;
+
+    case "PASSWORD_MISMATCH":
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match",
+      }));
+      break;
+
+    case "MISSING_FIELDS":
+      message.error("Please provide all required fields");
+      break;
+
+    case "VALIDATION_ERROR":
+      message.error(error.message || "Please correct the errors in the form");
+      break;
+
+    default:
+      message.error(error.message || "Failed to sign up. Please try again.");
+  }
     }
   };
 

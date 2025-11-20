@@ -53,10 +53,25 @@ export default class AuthController implements IAuthController {
       res.status(HttpStatusCode.CREATED).json(response.user);
     } catch (error: any) {
       console.error("Error in signup:", error);
-      res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-        message: error.message || MESSAGES.server.serverError,
-        code: error.code || "SERVER_ERROR",
-      });
+
+  // Handle known error codes
+  if (error.code === 'USER_EXISTS' || error.code === 'PHONE_EXISTS') {
+    res.status(error.status || HttpStatusCode.CONFLICT).json({
+      message: error.message,
+      code: error.code, // USER_EXISTS or PHONE_EXISTS
+    });
+  } else if (error.code === 'VALIDATION_ERROR' || error.code === 'MISSING_FIELDS') {
+    res.status(error.status || HttpStatusCode.BAD_REQUEST).json({
+      message: error.message,
+      code: error.code,
+    });
+  } else {
+    // Fallback for unexpected errors (including MongoDB E11000)
+    res.status(error.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.message || MESSAGES.server.serverError,
+      code: error.code || "SERVER_ERROR",
+    });
+  }
     }
   }
 
